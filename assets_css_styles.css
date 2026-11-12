@@ -1,0 +1,170 @@
+/* ============================================================
+   SIAC ÚNICO - Plataforma de Entrenamiento (ENTORNO DE ENTRENAMIENTO)
+   Estilos corporativos del portal central. Datos ficticios.
+   ============================================================ */
+* { box-sizing: border-box; }
+html, body { margin:0; padding:0; }
+body {
+  font-family: Arial, Tahoma, "Segoe UI", sans-serif;
+  font-size: 12px;
+  color: #333;
+  background: #eef1f5;
+}
+a { color: #0a558c; }
+
+/* ---------- Cintillo de entrenamiento ---------- */
+.training-bar {
+  background: #ffd200;
+  color: #6b4b00;
+  font-weight: bold;
+  font-size: 11px;
+  text-align: center;
+  padding: 3px 8px;
+  letter-spacing: .5px;
+  border-bottom: 1px solid #e0b800;
+}
+
+/* ---------- Header corporativo ---------- */
+.siac-header {
+  background: #d52b1e;
+  color: #fff;
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 56px;
+}
+.siac-brand { display: flex; align-items: center; gap: 10px; }
+.siac-logo {
+  width: 46px; height: 46px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ff5b4d 0%, #c21d12 70%);
+  border: 2px solid #fff;
+  color: #fff; font-weight: bold; font-size: 11px;
+  display: flex; align-items: center; justify-content: center;
+  font-style: italic;
+}
+.siac-title { font-size: 20px; font-weight: bold; letter-spacing: 3px; }
+.siac-subtitle { font-size: 10px; letter-spacing: .5px; }
+.siac-user { text-align: right; font-size: 11px; line-height: 1.5; }
+.siac-user b { font-size: 12px; }
+.btn-logout {
+  background: #8e1710; color: #fff; border: 1px solid #fff;
+  padding: 3px 10px; cursor: pointer; font-size: 11px; font-family: inherit;
+}
+.btn-logout:hover { background: #701008; }
+
+/* ---------- Menú principal ---------- */
+.siac-menu {
+  background: #1f1f1f; color: #fff; display: flex; flex-wrap: wrap;
+  border-bottom: 3px solid #d52b1e;
+}
+.siac-menu a {
+  color: #fff; text-decoration: none; padding: 8px 14px; font-size: 12px;
+  border-right: 1px solid #3a3a3a;
+}
+.siac-menu a:hover, .siac-menu a.active { background: #d52b1e; color: #ffd200; }
+
+/* ---------- Contenedores ---------- */
+.container { max-width: 1280px; margin: 12px auto; padding: 0 12px; }
+.panel { background: #fff; border: 1px solid #c9c9c9; margin-bottom: 12px; }
+.panel-header {
+  background: #9d9d9d; color: #fff; font-weight: bold; padding: 7px 10px; font-size: 12px;
+}
+.panel-body { padding: 12px; }
+.panel-footer { padding: 8px 10px; background: #f4f4f4; border-top: 1px solid #ddd; text-align: center; }
+
+h1.page-title { font-size: 18px; color: #333; margin: 6px 0 12px; }
+.breadcrumb { font-size: 11px; color: #666; margin: 6px 0; }
+
+/* ---------- Formularios ---------- */
+label { font-size: 12px; color: #333; }
+input[type=text], input[type=password], input[type=date], input[type=number], select, textarea {
+  font-family: inherit; font-size: 12px; padding: 5px 7px;
+  border: 1px solid #c3c3c3; background: #fff; color: #333; width: 100%;
+}
+input:disabled, select:disabled, input[readonly] { background: #ededed; color: #555; }
+textarea { min-height: 60px; }
+.form-row { display: flex; flex-wrap: wrap; gap: 10px 18px; margin-bottom: 10px; }
+.form-group { flex: 1 1 260px; display: flex; align-items: center; gap: 8px; }
+.form-group > label { flex: 0 0 150px; font-weight: bold; }
+.obligatorio { color: #d52b1e; font-weight: bold; }
+
+/* ---------- Botones ---------- */
+.btn {
+  font-family: inherit; font-size: 12px; padding: 6px 14px; cursor: pointer;
+  border: 1px solid #2e8f9e; background: #3ea7b8; color: #fff;
+}
+.btn:hover { background: #2e8f9e; }
+.btn-secondary { background: #8bc3cc; border-color: #8bc3cc; }
+.btn-secondary:hover { background: #6fb0bb; }
+.btn-danger { background: #d52b1e; border-color: #b0231a; }
+.btn-danger:hover { background: #b0231a; }
+.btn-dark { background: #5a5a5a; border-color: #4a4a4a; }
+.btn-dark:hover { background: #4a4a4a; }
+.btn-sm { padding: 3px 8px; font-size: 11px; }
+.botonera { text-align: center; padding: 10px; }
+.botonera .btn { margin: 0 4px; }
+
+/* ---------- Grillas ---------- */
+table.grid { width: 100%; border-collapse: collapse; font-size: 12px; }
+table.grid thead th {
+  background: #d52b1e; color: #fff; padding: 7px 6px; border: 1px solid #b0231a; text-align: center;
+}
+table.grid tbody td { padding: 5px 6px; border: 1px solid #d8d8d8; }
+table.grid tbody tr:nth-child(even) { background: #f7f7f7; }
+table.grid tbody tr:hover { background: #fdf3e2; }
+table.grid tbody tr.sel { background: #fff2cc; }
+.grid-empty { text-align: center; color: #888; padding: 14px; }
+
+/* ---------- Mensajes ---------- */
+.msg { padding: 8px 10px; margin: 8px 0; font-size: 12px; border: 1px solid; }
+.msg-ok { background: #e8f6e8; border-color: #9ad09a; color: #216b21; }
+.msg-error { background: #fdecea; border-color: #e5a39d; color: #a3251a; }
+.msg-warn { background: #fff8e1; border-color: #e8d08a; color: #8a6d1f; }
+.msg-info { background: #e8f2fb; border-color: #a9c9e8; color: #1c4f80; }
+.oculto { display: none !important; }
+
+/* ---------- Tarjetas del portal ---------- */
+.cards { display: flex; flex-wrap: wrap; gap: 12px; }
+.card {
+  flex: 1 1 280px; max-width: 340px; background: #fff; border: 1px solid #c9c9c9;
+  display: flex; flex-direction: column;
+}
+.card-head { background: #9d9d9d; color: #fff; padding: 7px 10px; font-weight: bold; }
+.card-body { padding: 12px; flex: 1; font-size: 12px; color: #555; }
+.card-foot { padding: 10px; border-top: 1px solid #eee; text-align: right; }
+.badge {
+  display: inline-block; padding: 2px 7px; font-size: 10px; font-weight: bold;
+  border-radius: 2px; color: #fff; background: #777;
+}
+.badge-sim { background: #ffd200; color: #6b4b00; }
+.badge-ok { background: #2f8f2f; }
+.badge-warn { background: #e08a00; }
+.badge-err { background: #d52b1e; }
+
+/* ---------- Modal ---------- */
+.modal-back {
+  position: fixed; inset: 0; background: rgba(0,0,0,.45);
+  display: flex; align-items: center; justify-content: center; z-index: 999;
+}
+.modal-box { background: #fff; border: 1px solid #999; min-width: 340px; max-width: 560px; }
+.modal-head { background: #9d9d9d; color: #fff; padding: 7px 10px; font-weight: bold; }
+.modal-body { padding: 14px; }
+.modal-foot { padding: 10px; text-align: center; border-top: 1px solid #eee; }
+
+/* ---------- Login ---------- */
+.login-wrap { display: flex; justify-content: center; padding: 40px 12px; }
+.login-box { width: 380px; background: #fff; border: 1px solid #c9c9c9; }
+.login-box .panel-header { text-align: center; }
+.login-field { margin-bottom: 12px; }
+.login-field label { display: block; font-weight: bold; margin-bottom: 4px; }
+.login-demo {
+  font-size: 11px; background: #fffbe6; border: 1px dashed #e0c86a;
+  padding: 8px; margin-top: 10px; color: #6b5a1f;
+}
+.footer-nota { text-align: center; font-size: 10px; color: #777; padding: 12px; }
+
+@media (max-width: 900px) {
+  .form-group > label { flex: 0 0 120px; }
+  .siac-title { font-size: 16px; letter-spacing: 1px; }
+}

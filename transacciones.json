@@ -1,0 +1,35 @@
+{
+  "portal": "SIAC ÚNICO - Plataforma de Entrenamiento (ENTORNO DE ENTRENAMIENTO)",
+  "actualizado": "2026-11-12",
+  "nota": "Catálogo de paquetes exportados. Todos los datos son simulados.",
+  "transacciones": [
+    {
+      "id": "CAMTIT",
+      "nombre": "Cambio de Titularidad",
+      "mdu": "MDU_SIAC_UNICO_CambioTitularidad _v2.docx",
+      "carpeta": "Transaccion/CambioTitularidad/",
+      "entrada": "index.html",
+      "loginPropio": "login.html",
+      "permiso": "transaccion.CAMTIT.ejecutar",
+      "recursosPropios": ["assets_css_styles.css", "assets_js_app.js"],
+      "pantallas": [
+        "CambioTitularidad_AccesoSistema.html",
+        "CambioTitularidad_DiagramaProceso.html",
+        "CambioTitularidad_BusquedaCliente.html",
+        "CambioTitularidad_MenuTransaccionesCuenta.html",
+        "CambioTitularidad_CambioTitularidad.html",
+        "CambioTitularidad_ValidacionPin.html",
+        "CambioTitularidad_ValidacionSupervisor.html",
+        "CambioTitularidad_LineasCuentaOrigen.html",
+        "CambioTitularidad_TransferirCuentaExistente.html",
+        "CambioTitularidad_CrearCuenta.html",
+        "CambioTitularidad_DatosIdentificacionPersonal.html",
+        "CambioTitularidad_DatosContacto.html",
+        "CambioTitularidad_DireccionFacturacion.html",
+        "CambioTitularidad_ConfirmacionOperacion.html",
+        "CambioTitularidad_Constancia.html",
+        "CambioTitularidad_EvaluacionAsesor.html"
+      ]
+    }
+  ]
+}

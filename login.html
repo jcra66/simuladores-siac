@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SIAC ÚNICO - Acceso al Simulador de Capacitación</title>
+<link rel="stylesheet" href="assets_css_styles.css">
+</head>
+<body>
+<div id="hdr"></div>
+
+<div class="login-wrap">
+  <div class="login-box">
+    <div class="panel-header">ACCESO AL SIMULADOR SIAC ÚNICO</div>
+    <div class="panel-body">
+      <div id="msg" class="oculto"></div>
+      <form id="frmLogin" autocomplete="off">
+        <div class="login-field">
+          <label for="txtUsuario">Usuario <span class="obligatorio">(*)</span></label>
+          <input type="text" id="txtUsuario" maxlength="30" placeholder="Ej. asesor01">
+        </div>
+        <div class="login-field">
+          <label for="txtClave">Contraseña <span class="obligatorio">(*)</span></label>
+          <input type="password" id="txtClave" maxlength="30">
+        </div>
+        <div class="botonera">
+          <button type="submit" class="btn">Ingresar</button>
+          <button type="button" class="btn btn-secondary" onclick="limpiar()">Limpiar</button>
+        </div>
+      </form>
+      <div class="login-demo">
+        <b>CREDENCIALES SOLO DEMOSTRACIÓN (DATO SIMULADO PARA ENTRENAMIENTO)</b><br>
+        Administrador: <b>admin.demo</b> / <b>Admin123!</b><br>
+        Asesor: <b>asesor01</b> / <b>Asesor123!</b><br>
+        Asesor: <b>asesor02</b> / <b>Asesor123!</b><br>
+        Asesor inactivo (prueba de error): <b>asesor03</b> / <b>Asesor123!</b>
+      </div>
+      <div class="msg msg-warn" style="margin-top:10px">
+        Autenticación demostrativa basada en almacenamiento del navegador.
+        <b>No ofrece seguridad real</b> ni conecta con sistemas productivos.
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer-nota">SIAC ÚNICO &mdash; Simulador de entrenamiento para asesores · Datos ficticios · Sin conexión a sistemas reales</div>
+
+<script>window.SIAC_BASE = '';</script>
+<script src="assets_js_data.js"></script>
+<script src="assets_js_auth.js"></script>
+<script src="assets_js_app.js"></script>
+<script>
+SIACAUTH.salir();
+SIACAUTH.pintarHeader('hdr', { sinMenu: true });
+
+if (!SIACDATA.almacenamientoDisponible()) {
+  APP.mensaje('msg', 'El navegador bloquea el almacenamiento local. El simulador funcionará, pero no podrá conservar la trazabilidad entre pantallas.', 'warn');
+}
+var m = APP.param('msg');
+if (m === 'sesion') APP.mensaje('msg', 'Su sesión no está activa. Ingrese nuevamente.', 'warn');
+if (m === 'salida') APP.mensaje('msg', 'Sesión finalizada correctamente.', 'ok');
+
+function limpiar() {
+  document.getElementById('txtUsuario').value = '';
+  document.getElementById('txtClave').value = '';
+  APP.mensaje('msg', '', '');
+}
+
+document.getElementById('frmLogin').onsubmit = function (e) {
+  e.preventDefault();
+  var u = document.getElementById('txtUsuario').value;
+  var c = document.getElementById('txtClave').value;
+  var r = SIACAUTH.ingresar(u, c);
+  if (!r.ok) { APP.mensaje('msg', r.msg, 'error'); document.getElementById('txtClave').value = ''; return; }
+  APP.mensaje('msg', 'Acceso correcto. Redirigiendo al portal...', 'ok');
+  setTimeout(function () { window.location.href = 'index.html'; }, 400);
+};
+</script>
+</body>
+</html>

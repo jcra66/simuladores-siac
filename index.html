@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SIAC ÚNICO - Portal de Entrenamiento</title>
+<link rel="stylesheet" href="assets_css_styles.css">
+</head>
+<body>
+<div id="hdr"></div>
+<div class="container">
+  <div class="breadcrumb">Portal de Entrenamiento</div>
+  <h1 class="page-title">Opciones autorizadas para su perfil</h1>
+  <div id="msg" class="oculto"></div>
+
+  <div class="panel">
+    <div class="panel-header">TRANSACCIONES DE SIMULACIÓN</div>
+    <div class="panel-body"><div class="cards" id="cardsTrx"></div></div>
+  </div>
+
+  <div class="panel" id="panelAdm">
+    <div class="panel-header">ADMINISTRACIÓN Y REPORTES</div>
+    <div class="panel-body"><div class="cards" id="cardsAdm"></div></div>
+  </div>
+
+  <div class="panel" id="panelMis">
+    <div class="panel-header">MIS RESULTADOS DE ENTRENAMIENTO (SIMULADOS)</div>
+    <div class="panel-body">
+      <table class="grid" id="tblMis">
+        <thead><tr><th>Sesión</th><th>Transacción</th><th>Inicio</th><th>Duración</th><th>Estado</th><th>Puntaje</th><th>Resultado</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<div class="footer-nota">ENTORNO DE ENTRENAMIENTO · Datos ficticios · Almacenamiento local del navegador (no es base de datos centralizada)</div>
+
+<script>window.SIAC_BASE = '';</script>
+<script src="assets_js_data.js"></script>
+<script src="assets_js_auth.js"></script>
+<script src="assets_js_app.js"></script>
+<script>
+var ses = SIACAUTH.exigir(null);
+if (ses) {
+  SIACAUTH.pintarHeader('hdr', { activo: 'portal' });
+  if (APP.param('msg') === 'denegado') {
+    APP.mensaje('msg', 'Acceso denegado: su perfil <b>' + APP.esc(ses.perfil) + '</b> no cuenta con el permiso requerido para esa opción.', 'error');
+  }
+
+  /* ---- Transacciones según catálogo y permisos ---- */
+  var cont = document.getElementById('cardsTrx'), html = '', n = 0;
+  SIACDATA.transacciones().forEach(function (t) {
+    if (ses.permisos.indexOf(t.permiso) < 0) return;
+    n++;
+    var entrada = t.carpeta + t.entrada;
+    html +=
+      '<div class="card"><div class="card-head">' + APP.esc(t.nombre) + '</div>' +
+      '<div class="card-body">' +
+      '<span class="badge badge-sim">SIMULADO</span> <span class="badge">' + t.id + '</span><br><br>' +
+      'Fuente funcional: <b>' + APP.esc(t.mdu) + '</b><br>' +
+      'Pantallas del flujo: <b>' + t.pantallas.length + '</b><br>' +
+      'Ruta del paquete: <code>' + APP.esc(t.carpeta) + '</code><br>' +
+      'Página de entrada: <code>' + APP.esc(t.entrada) + '</code>' +
+      '</div>' +
+      '<div class="card-foot">' +
+      '<button type="button" class="btn" onclick="location.href=\'' + entrada + '?portal=1\'">Iniciar simulación</button>' +
+      '</div></div>';
+  });
+  cont.innerHTML = n ? html : '<div class="grid-empty">Su perfil no tiene transacciones de simulación autorizadas.</div>';
+
+  /* ---- Opciones administrativas ---- */
+  var adm = '', nAdm = 0;
+  function card(titulo, desc, href, texto) {
+    nAdm++;
+    return '<div class="card"><div class="card-head">' + titulo + '</div>' +
+           '<div class="card-body">' + desc + '</div>' +
+           '<div class="card-foot"><button type="button" class="btn" onclick="location.href=\'' + href + '\'">' + texto + '</button></div></div>';
+  }
+  if (ses.permisos.indexOf('usuarios.ver') >= 0)
+    adm += card('Mantenimiento de Usuarios', 'Registro, edición, eliminación, asignación de perfil y activación/desactivación de usuarios (SIMULADO).', 'Mantenimiento/MantUsuario.html', 'Ingresar');
+  if (ses.permisos.indexOf('perfiles.gestionar') >= 0)
+    adm += card('Mantenimiento de Perfiles', 'Perfiles, matriz de permisos de usuarios, perfiles, reportes y transacciones (SIMULADO).', 'Mantenimiento/MantPerfil.html', 'Ingresar');
+  if (ses.permisos.indexOf('reportes.ver') >= 0)
+    adm += card('Reportes de Trazabilidad', 'Sesiones de simulación, tiempos por pantalla, recorrido, errores, puntaje y exportación CSV.', 'Reporte/GesReporte.html', 'Ingresar');
+  document.getElementById('cardsAdm').innerHTML = adm;
+  if (!nAdm) document.getElementById('panelAdm').className = 'panel oculto';
+
+  /* ---- Resultados propios del asesor ---- */
+  var cuerpo = document.querySelector('#tblMis tbody');
+  if (ses.permisos.indexOf('reportes.propios') >= 0) {
+    var mios = SIACDATA.sesiones().filter(function (s) { return s.usuarioId === ses.usuarioId; });
+    if (!mios.length) {
+      cuerpo.innerHTML = '<tr><td colspan="7" class="grid-empty">Aún no registra simulaciones.</td></tr>';
+    } else {
+      cuerpo.innerHTML = mios.map(function (s) {
+        return '<tr><td>' + s.id + '</td><td>' + APP.esc(s.trx) + '</td><td>' + APP.fecha(s.inicio) + '</td><td>' +
+          APP.hhmmss(s.duracion) + '</td><td>' + s.estado + '</td><td style="text-align:right">' + s.puntaje +
+          '</td><td>' + s.resultado + '</td></tr>';
+      }).join('');
+    }
+  } else {
+    document.getElementById('panelMis').className = 'panel oculto';
+  }
+}
+</script>
+</body>
+</html>
