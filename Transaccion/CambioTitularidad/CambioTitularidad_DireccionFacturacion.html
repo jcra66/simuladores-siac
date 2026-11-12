@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cambio de Titularidad - Dirección de Facturación</title>
+<link rel="stylesheet" href="assets_css_styles.css">
+</head>
+<body>
+<div id="hdr"></div>
+<div id="ruta" class="ruta"></div>
+<div class="wrap">
+  <div class="col-cliente" id="ficha"></div>
+  <div class="col-main">
+    <div id="msgGlobal" class="oculto"></div>
+    <div class="panel">
+      <div class="panel-header">Dirección de Facturación (3.2.20)</div>
+      <div class="panel-body">
+        <div class="escenario">Presione <b>Copiar la direccion de domicilio</b> si la dirección de facturación es la misma.</div>
+        <div id="msg" class="oculto"></div>
+        <span class="nota-obligatorio">(*) Campos Obligatorios</span>
+        <a class="enlace-seccion">Dirección de Facturación</a>
+        <div class="subpanel">
+          <div class="form-row">
+            <div class="form-group" style="flex:1 1 100%">
+              <label style="flex:0 0 auto"><input type="checkbox" id="copiar" onchange="copiar()" style="width:auto"> <b>Copiar la direccion de domicilio</b></label>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Calle/Av./Jr.<span class="obligatorio">(*)</span></label>
+              <select id="tipoCalle"><option value="">Seleccionar</option><option value="CA - Calle">CA - Calle</option><option value="AV - Avenida">AV - Avenida</option><option value="JR - Jiron">JR - Jiron</option></select></div>
+            <div class="form-group"><label>Nombre Calle/Av./Jr.<span class="obligatorio">(*)</span></label><input type="text" id="nomCalle" maxlength="40"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Número<span class="obligatorio">(*)</span></label><input type="text" id="numero" maxlength="6"></div>
+            <div class="form-group"><label>S/N:</label><input type="checkbox" id="sn" style="width:auto" onchange="toggleSN()"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Mz/Bloque/Edif:</label>
+              <select id="mz"><option value="">Seleccionar</option><option selected>MZ - Manzana</option><option>BL - Bloque</option></select></div>
+            <div class="form-group"><label>Nro Mz/Bloque/Edif:</label><input type="text" id="nroMz" maxlength="6"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Referencias<span class="obligatorio">(*)</span></label><input type="text" id="referencia" maxlength="40"></div>
+            <div class="form-group" style="flex:0 0 200px"><label>(Máx.40):</label><input type="text" id="cntRef" value="0" readonly style="width:60px"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>País:</label><select id="pais"><option selected>Peru</option></select></div>
+            <div class="form-group"><label>Departamento<span class="obligatorio">(*)</span></label>
+              <select id="dep"><option value="">Seleccionar</option><option>LIMA</option><option>AREQUIPA</option><option>LA LIBERTAD</option></select></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Provincia<span class="obligatorio">(*)</span></label><input type="text" id="prov" maxlength="30"></div>
+            <div class="form-group"><label>Distrito<span class="obligatorio">(*)</span></label><input type="text" id="dist" maxlength="30"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Cod Postal:</label><input type="text" id="cp" maxlength="5"></div>
+          </div>
+          <span class="nota-obligatorio">(*) Campos Obligatorios</span>
+        </div>
+      </div>
+      <div class="botonera" style="border-top:1px solid #eee">
+        <button type="button" class="btn btn-claro" onclick="SIAC.ir('CambioTitularidad_DatosContacto.html','Datos de Contacto')">Volver</button>
+        <button type="button" class="btn" onclick="continuar()">&#128190; Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="footer-nota">ENTORNO DE ENTRENAMIENTO · Datos ficticios</div>
+
+<script src="assets_js_app.js"></script>
+<script>
+SIAC.initPantalla({ nombre: 'Dirección de Facturación', paso: '3.2.20', menu: 'cuenta', linea: SIAC.CLIENTE.linea });
+SIAC.fichaCliente('ficha');
+
+document.getElementById('referencia').addEventListener('input', function () {
+  document.getElementById('cntRef').value = this.value.length;
+});
+function toggleSN() {
+  var sn = document.getElementById('sn').checked;
+  document.getElementById('numero').disabled = sn;
+  if (sn) document.getElementById('numero').value = '';
+}
+
+function copiar() {
+  var d = SIAC.datos().domicilio;
+  if (!document.getElementById('copiar').checked) return;
+  if (!d) {
+    SIAC.mensaje('msg', 'No hay dirección de domicilio registrada. Complete primero Datos de Contacto (3.2.19).', 'warn');
+    document.getElementById('copiar').checked = false;
+    return;
+  }
+  document.getElementById('tipoCalle').value = d.tipoCalle;
+  document.getElementById('nomCalle').value = d.nomCalle;
+  document.getElementById('numero').value = d.numero;
+  document.getElementById('sn').checked = !!d.sn; toggleSN();
+  document.getElementById('mz').value = d.mz || '';
+  document.getElementById('nroMz').value = d.nroMz || '';
+  document.getElementById('referencia').value = d.referencia;
+  document.getElementById('cntRef').value = (d.referencia || '').length;
+  document.getElementById('dep').value = d.dep;
+  document.getElementById('prov').value = d.prov;
+  document.getElementById('dist').value = d.dist;
+  document.getElementById('cp').value = d.cp || '';
+  SIAC.mensaje('msg', 'Dirección de domicilio copiada a la dirección de facturación.', 'ok');
+  SIAC.registrar('Dirección de Facturación', 'Copiar la direccion de domicilio', 'OK');
+}
+
+function err(texto, detalle) {
+  SIAC.mensaje('msg', texto, 'error');
+  SIAC.registrar('Dirección de Facturación', detalle, 'ERROR: ' + texto);
+  return false;
+}
+
+function continuar() {
+  if (!document.getElementById('tipoCalle').value) return err('Debe ingresar tipo de calle.', 'Sin tipo de calle');
+  if (!document.getElementById('nomCalle').value.trim()) return err('Debe ingresar el nombre de la calle.', 'Sin nombre de calle');
+  if (!document.getElementById('sn').checked && !document.getElementById('numero').value.trim())
+    return err('Debe ingresar el número o marcar S/N.', 'Sin número');
+  if (!document.getElementById('referencia').value.trim()) return err('Debe ingresar una referencia de domicilio.', 'Sin referencia');
+  if (!document.getElementById('dep').value) return err('Debe seleccionar departamento domicilio.', 'Sin departamento');
+  if (!document.getElementById('prov').value.trim()) return err('Debe seleccionar provincia domicilio.', 'Sin provincia');
+  if (!document.getElementById('dist').value.trim()) return err('Debe seleccionar un distrito domicilio.', 'Sin distrito');
+
+  SIAC.guardarDatos({
+    facturacion: {
+      tipoCalle: document.getElementById('tipoCalle').value, nomCalle: document.getElementById('nomCalle').value,
+      numero: document.getElementById('numero').value, sn: document.getElementById('sn').checked,
+      referencia: document.getElementById('referencia').value, dep: document.getElementById('dep').value,
+      prov: document.getElementById('prov').value, dist: document.getElementById('dist').value,
+      cp: document.getElementById('cp').value
+    }
+  });
+  SIAC.registrar('Dirección de Facturación', 'Presiona Guardar', 'OK');
+  SIAC.ir('CambioTitularidad_ConfirmacionOperacion.html', 'Confirmación de Operación');
+}
+</script>
+</body>
+</html>

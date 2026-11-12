@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulador Cambio de Titularidad - Inicio</title>
+<link rel="stylesheet" href="assets_css_styles.css">
+</head>
+<body>
+<div class="training-bar">ENTORNO DE ENTRENAMIENTO &mdash; SIMULADOR SIAC ÚNICO · DATOS SIMULADOS</div>
+<div class="siac-header">
+  <div class="siac-brand"><div class="siac-logo">Claro</div>
+    <div><div class="siac-title">SIAC ÚNICO</div>
+    <div class="siac-subtitle">SIMULADOR DE CAPACITACIÓN &mdash; CAMBIO DE TITULARIDAD</div></div></div>
+  <div class="siac-sesion" id="infoSesion"></div>
+</div>
+
+<div style="padding:12px">
+  <div id="msg" class="oculto"></div>
+
+  <div class="panel">
+    <div class="panel-header">TRANSACCIÓN: CAMBIO DE TITULARIDAD &mdash; OBJETIVO FUNCIONAL</div>
+    <div class="panel-body">
+      <p>El Sistema SIACUNICO Account realiza el registro del <b>Cambio de Titularidad</b>: transferencia de una o varias
+      líneas de la cuenta origen hacia una cuenta existente del cliente o hacia una cuenta nueva, previa validación de
+      PIN de seguridad o validación de Jefe/Supervisor.</p>
+      <p>Fuente funcional: <b>MDU_SIAC_UNICO_CambioTitularidad _v2.docx</b> (secciones 1.2.2, 1.2.3, 1.2.4 y 3.2.1 a 3.2.25).</p>
+      <div class="escenario">
+        <b>Objetivo de aprendizaje:</b> comprender el proceso, practicar el flujo completo, identificar las validaciones,
+        reconocer los mensajes de error del sistema y completar la transacción de inicio a fin.
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">FLUJO PRINCIPAL (16 PANTALLAS)</div>
+    <div class="panel-body">
+      <ol style="line-height:1.8">
+        <li>Acceso al Sistema SIACUNICO (3.2.1)</li>
+        <li>Diagrama del proceso de negocio y validación PIN (3.2)</li>
+        <li>Búsqueda de cliente por N° línea (3.2.2)</li>
+        <li>Menú Transacciones por Cuenta &gt; Cambio de Titularidad (3.2.3 / 3.2.4)</li>
+        <li>Página principal de Cambio de Titularidad &mdash; Motivo, Solicitante, Enviar PIN (3.2.5)</li>
+        <li>Validación de PIN &mdash; conforme / inválido / ¿No recibió PIN? (3.2.6 a 3.2.9)</li>
+        <li>Validación de Jefe/Supervisor (3.2.10 a 3.2.12)</li>
+        <li>Líneas de la Cuenta Origen (3.2.13 a 3.2.15)</li>
+        <li>Transferir en Cuenta Existente (3.2.16)</li>
+        <li>Crear Cuenta (3.2.17)</li>
+        <li>Datos de Identificación Personal (3.2.18)</li>
+        <li>Datos de Contacto (3.2.19)</li>
+        <li>Dirección de Facturación (3.2.20)</li>
+        <li>Confirmación de la operación &mdash; Guardar / Aceptar / Éxito (3.2.21 a 3.2.23)</li>
+        <li>Constancia (3.2.24 y 3.2.25)</li>
+        <li>Evaluación del asesor (componente de entrenamiento)</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">ESCENARIOS DE PRÁCTICA DISPONIBLES</div>
+    <div class="panel-body">
+      <ul style="line-height:1.8">
+        <li><b>Escenario 1 (éxito con PIN):</b> perfil sin permiso de omisión, PIN correcto <b>1234 (SIMULADO)</b>, transferencia a cuenta existente.</li>
+        <li><b>Escenario 2 (perfil con permiso):</b> el sistema muestra "Su perfil no necesita esta validación" y continúa el flujo normal.</li>
+        <li><b>Escenario 3 (PIN inválido):</b> mensaje "PIN inválido o incorrecto. Ingrese un PIN válido"; se borra el PIN y se habilita ENVIAR PIN.</li>
+        <li><b>Escenario 4 (validación de Jefe/Supervisor):</b> luego del segundo intento fallido, usar "¿No recibió PIN?" con usuario <b>supervisor01 / Super123! (SIMULADO)</b>.</li>
+        <li><b>Escenario 5 (Crear Cuenta):</b> el cliente no tiene cuenta existente; se registra el nuevo titular.</li>
+        <li><b>Escenario 6 (errores de validación):</b> guardar sin seleccionar línea, sin cuenta destino o sin campos obligatorios de dirección.</li>
+      </ul>
+      <div class="escenario">El temporizador de la prueba <b>inicia al abrir la primera pantalla operativa</b> (Acceso al Sistema) y se mantiene en todas las pantallas de la misma ejecución.</div>
+    </div>
+    <div class="botonera">
+      <button type="button" class="btn" onclick="iniciar()">Iniciar prueba (nueva ejecución)</button>
+      <button type="button" class="btn btn-claro" id="btnContinuar" onclick="continuar()">Continuar prueba en curso</button>
+      <button type="button" class="btn btn-claro" onclick="location.href='CambioTitularidad_DiagramaProceso.html'">Ver diagrama del proceso</button>
+      <button type="button" class="btn btn-gris" onclick="volverPortal()">Volver al portal</button>
+    </div>
+  </div>
+</div>
+<div class="footer-nota">Paquete autónomo Transaccion/CambioTitularidad/ · Datos ficticios · Sin conexión a sistemas reales</div>
+
+<script src="assets_js_app.js"></script>
+<script>
+var s = SIAC.exigirSesion();
+if (s) {
+  document.getElementById('infoSesion').innerHTML =
+    '<b>' + SIAC.esc(s.usuarioId) + ' - ' + SIAC.esc(s.nombre) + '</b><br>Perfil: ' + SIAC.esc(s.perfil) +
+    '<br><button type="button" class="btn-logout" onclick="SIAC.cerrarSesionPaquete()">Cerrar sesión</button>';
+
+  var ej = SIAC.ejecucion();
+  if (ej) {
+    SIAC.mensaje('msg', 'Existe una prueba en curso: <b>' + SIAC.esc(ej.id) + '</b> iniciada el ' + SIAC.fechaTxt(ej.inicio) +
+      '. Puede continuarla o iniciar una nueva ejecución (la anterior quedará como <b>Incompleta</b>).', 'warn');
+  } else {
+    document.getElementById('btnContinuar').disabled = true;
+  }
+  if (!SIAC.almacenamientoOK()) {
+    SIAC.mensaje('msg', 'El navegador bloquea el almacenamiento local; la continuidad del temporizador entre pantallas no podrá garantizarse.', 'error');
+  }
+}
+function iniciar() { location.href = 'CambioTitularidad_AccesoSistema.html?iniciar=1'; }
+function continuar() {
+  var ej = SIAC.ejecucion();
+  if (!ej) return;
+  var ultima = ej.recorrido && ej.recorrido.length ? ej.recorrido[ej.recorrido.length - 1] : null;
+  location.href = 'CambioTitularidad_AccesoSistema.html';
+}
+function volverPortal() { location.href = '../../index.html'; }
+</script>
+</body>
+</html>

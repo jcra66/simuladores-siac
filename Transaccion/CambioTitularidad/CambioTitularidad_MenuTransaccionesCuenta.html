@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cambio de Titularidad - Transacciones por Cuenta</title>
+<link rel="stylesheet" href="assets_css_styles.css">
+</head>
+<body>
+<div id="hdr"></div>
+<div id="ruta" class="ruta"></div>
+<div class="wrap">
+  <div class="col-cliente" id="ficha"></div>
+  <div class="col-main">
+    <div id="msgGlobal" class="oculto"></div>
+    <div class="panel">
+      <div class="panel-header">3.2.3 / 3.2.4 SELECCIONAR TRANSACCIONES POR CUENTA &gt; CAMBIO DE TITULARIDAD</div>
+      <div class="panel-body">
+        <div class="escenario">
+          Despliegue el menú <b>Transacciones por Cuenta</b> en la barra superior y seleccione la opción
+          <b>Cambio de Titularidad</b>. También puede usar el listado de esta pantalla.
+        </div>
+        <div id="msg" class="oculto"></div>
+        <table class="grid">
+          <thead><tr><th style="width:60px">#</th><th>Opción del menú Transacciones por Cuenta</th><th style="width:140px">Acción</th></tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+      <div class="botonera" style="border-top:1px solid #eee">
+        <button type="button" class="btn btn-claro" onclick="SIAC.ir('CambioTitularidad_BusquedaCliente.html','Búsqueda de Cliente')">Volver</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="footer-nota">ENTORNO DE ENTRENAMIENTO · Datos ficticios</div>
+
+<script src="assets_js_app.js"></script>
+<script>
+SIAC.initPantalla({ nombre: 'Transacciones por Cuenta', paso: '3.2.3 / 3.2.4', menu: 'cuenta', linea: SIAC.CLIENTE.linea });
+SIAC.fichaCliente('ficha');
+
+var opciones = ['A Servicios Masivos', 'Activación / Desactivación Bolsa',
+  'Activación / Desactivación Bolsa RPM/RPMe/Servicio', 'Activación / Desactivación de Servicios',
+  'Afiliación Débito Automático', 'Afiliación Débito Automático NP', 'Ajuste OCC Atención Cliente',
+  'Anulación OCC', 'Bolsa Compartida', 'Cambio de Titularidad'];
+
+document.getElementById('tbody').innerHTML = opciones.map(function (o, i) {
+  var dentro = (o === 'Cambio de Titularidad');
+  return '<tr' + (dentro ? ' class="sel"' : '') + '><td>' + (i + 1) + '</td>' +
+    '<td style="text-align:left">' + (dentro ? '<b>' + o + '</b>' : o) + '</td>' +
+    '<td>' + (dentro
+      ? '<button class="btn btn-sm" onclick="seleccionar()">Seleccionar</button>'
+      : '<button class="btn btn-sm btn-claro" onclick="SIAC.opcionNoCubierta(\'' + o.replace(/'/g, '') + '\')">Abrir</button>') +
+    '</td></tr>';
+}).join('');
+
+function seleccionar() {
+  SIAC.registrar('Transacciones por Cuenta', 'Selecciona opción Cambio de Titularidad', 'OK');
+  SIAC.ir('CambioTitularidad_CambioTitularidad.html', 'Cambio de Titularidad');
+}
+</script>
+</body>
+</html>

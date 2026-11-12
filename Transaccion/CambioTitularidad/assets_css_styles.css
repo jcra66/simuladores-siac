@@ -1,0 +1,161 @@
+/* ============================================================
+   SIAC ÚNICO - Simulador CAMBIO DE TITULARIDAD (paquete autónomo)
+   Estilo corporativo basado en las capturas del MDU
+   MDU_SIAC_UNICO_CambioTitularidad _v2.docx
+   ENTORNO DE ENTRENAMIENTO - DATOS SIMULADOS
+   ============================================================ */
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body { font-family: Arial, Tahoma, "Segoe UI", sans-serif; font-size: 12px; color: #333; background: #eef1f5; }
+a { color: #0a558c; }
+
+.training-bar {
+  background: #ffd200; color: #6b4b00; font-weight: bold; font-size: 11px;
+  text-align: center; padding: 3px 8px; border-bottom: 1px solid #e0b800;
+}
+
+/* ---------- Header SIAC ÚNICO ---------- */
+.siac-header { background: #d52b1e; color: #fff; padding: 5px 12px; display: flex; align-items: center; justify-content: space-between; }
+.siac-brand { display: flex; align-items: center; gap: 10px; }
+.siac-logo {
+  width: 44px; height: 44px; border-radius: 50%; border: 2px solid #fff; font-style: italic;
+  background: radial-gradient(circle at 35% 35%, #ff5b4d 0%, #c21d12 70%);
+  display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold;
+}
+.siac-title { font-size: 19px; font-weight: bold; letter-spacing: 3px; }
+.siac-subtitle { font-size: 9px; letter-spacing: .4px; }
+.siac-sesion { font-size: 10px; text-align: right; line-height: 1.5; }
+.btn-logout { background: #8e1710; color: #fff; border: 1px solid #fff; padding: 2px 8px; font-size: 10px; cursor: pointer; font-family: inherit; }
+
+/* ---------- Buscador superior ---------- */
+.siac-tools { background: #d52b1e; color: #fff; padding: 0 12px 7px; display: flex; gap: 10px; align-items: center; justify-content: flex-end; }
+.siac-tools select, .siac-tools input { font-size: 11px; padding: 3px 5px; border: 1px solid #fff; }
+.siac-tools .btn-buscar { background: #fff; color: #d52b1e; border: 1px solid #fff; padding: 3px 9px; cursor: pointer; font-weight: bold; }
+
+/* ---------- Menú SIAC ---------- */
+.siac-menu { background: #1f1f1f; color: #fff; display: flex; flex-wrap: wrap; border-bottom: 3px solid #d52b1e; position: relative; }
+.siac-menu > div { position: relative; }
+.siac-menu .mi { color: #fff; padding: 8px 13px; font-size: 12px; cursor: pointer; border-right: 1px solid #3a3a3a; display: block; text-decoration: none; }
+.siac-menu .mi:hover, .siac-menu .mi.abierto { background: #d52b1e; color: #ffd200; }
+.submenu { display: none; position: absolute; left: 0; top: 100%; background: #f1f1f1; border: 1px solid #bdbdbd; min-width: 290px; z-index: 50; max-height: 320px; overflow-y: auto; }
+.submenu.visible { display: block; }
+.submenu a { display: block; padding: 6px 10px; color: #222; text-decoration: none; border-bottom: 1px solid #e0e0e0; font-size: 11px; }
+.submenu a:hover { background: #d9d9d9; }
+.submenu a.destacado { font-weight: bold; color: #b0231a; }
+
+/* ---------- Barra de prueba / temporizador ---------- */
+.trx-bar {
+  background: #3c3c3c; color: #fff; display: flex; flex-wrap: wrap; gap: 18px;
+  align-items: center; padding: 6px 12px; font-size: 11px; border-bottom: 2px solid #ffd200;
+}
+.trx-bar b { color: #ffd200; }
+.trx-timer {
+  font-family: "Courier New", Courier, monospace; font-size: 16px; font-weight: bold;
+  background: #1f1f1f; color: #00e07a; padding: 2px 10px; border: 1px solid #00a85c; letter-spacing: 1px;
+}
+.trx-estado { padding: 2px 8px; background: #ffd200; color: #6b4b00; font-weight: bold; }
+.trx-bar .btn-cancelar { margin-left: auto; background: #8e1710; color: #fff; border: 1px solid #fff; padding: 3px 9px; cursor: pointer; font-family: inherit; font-size: 11px; }
+
+/* ---------- Ruta de pantallas ---------- */
+.ruta { background: #fff; border-bottom: 1px solid #d5d5d5; padding: 5px 12px; font-size: 11px; color: #555; }
+.ruta b { color: #d52b1e; }
+
+/* ---------- Layout ---------- */
+.wrap { display: flex; gap: 10px; padding: 10px; align-items: flex-start; }
+.col-cliente { flex: 0 0 300px; }
+.col-main { flex: 1 1 auto; min-width: 0; }
+@media (max-width: 980px) { .wrap { flex-direction: column; } .col-cliente { flex: 1 1 auto; width: 100%; } }
+
+.panel { background: #fff; border: 1px solid #c9c9c9; margin-bottom: 10px; }
+.panel-header { background: #9d9d9d; color: #fff; font-weight: bold; padding: 7px 10px; font-size: 12px; }
+.panel-header .icono { margin-right: 5px; }
+.panel-body { padding: 12px; }
+.subpanel { border: 1px solid #d8d8d8; padding: 10px; margin-bottom: 10px; }
+
+/* ---------- Ficha del cliente ---------- */
+.ficha { width: 100%; border-collapse: collapse; font-size: 11px; }
+.ficha td { padding: 6px 8px; border-bottom: 1px solid #ededed; vertical-align: top; }
+.ficha td.k { color: #333; width: 46%; }
+.ficha td.v { font-weight: bold; color: #222; }
+
+/* ---------- Formularios ---------- */
+.form-row { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-bottom: 10px; }
+.form-group { flex: 1 1 320px; display: flex; align-items: center; gap: 8px; }
+.form-group > label { flex: 0 0 140px; font-size: 12px; }
+input[type=text], input[type=password], input[type=date], input[type=email], input[type=number], select, textarea {
+  font-family: inherit; font-size: 12px; padding: 5px 7px; border: 1px solid #c3c3c3; background: #fff; width: 100%;
+}
+input:disabled, select:disabled, input[readonly], textarea[readonly] { background: #ededed; color: #555; }
+textarea { min-height: 70px; }
+.obligatorio, .nota-obligatorio { color: #d52b1e; font-weight: bold; }
+.nota-obligatorio { font-size: 11px; display: block; margin: 6px 0; }
+.chk-inline { display: inline-flex; align-items: center; gap: 5px; margin-right: 18px; }
+.enlace-seccion { color: #0a558c; text-decoration: underline; font-weight: bold; display: inline-block; margin: 8px 0; }
+
+/* ---------- Botones ---------- */
+.btn { font-family: inherit; font-size: 12px; padding: 6px 14px; cursor: pointer; border: 1px solid #2e8f9e; background: #3ea7b8; color: #fff; }
+.btn:hover { background: #2e8f9e; }
+.btn-claro { background: #8bc3cc; border-color: #8bc3cc; }
+.btn-claro:hover { background: #6fb0bb; }
+.btn-rojo { background: #d52b1e; border-color: #b0231a; }
+.btn-rojo:hover { background: #b0231a; }
+.btn-gris { background: #5a5a5a; border-color: #4a4a4a; }
+.btn:disabled { background: #cfcfcf; border-color: #bdbdbd; cursor: not-allowed; }
+.botonera { text-align: center; padding: 10px; }
+.botonera .btn { margin: 3px 4px; }
+
+/* ---------- Grillas ---------- */
+table.grid { width: 100%; border-collapse: collapse; font-size: 12px; }
+table.grid thead th { background: #d52b1e; color: #fff; padding: 8px 6px; border: 1px solid #b0231a; text-align: center; }
+table.grid tbody td { padding: 6px; border: 1px solid #d8d8d8; text-align: center; }
+table.grid tbody tr:nth-child(even) { background: #f8f8f8; }
+table.grid tbody tr.sel { background: #fff2cc; }
+.total-reintegro { font-weight: bold; padding: 8px 4px; }
+
+/* ---------- Mensajes ---------- */
+.msg { padding: 8px 10px; margin: 8px 0; font-size: 12px; border: 1px solid; }
+.msg-ok { background: #e8f6e8; border-color: #9ad09a; color: #216b21; }
+.msg-error { background: #fdecea; border-color: #e5a39d; color: #a3251a; }
+.msg-warn { background: #fff8e1; border-color: #e8d08a; color: #8a6d1f; }
+.msg-info { background: #e8f2fb; border-color: #a9c9e8; color: #1c4f80; }
+.oculto { display: none !important; }
+
+/* ---------- Modal / Pop-up ---------- */
+.modal-back { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: flex; align-items: center; justify-content: center; z-index: 999; }
+.modal-box { background: #fff; border: 1px solid #999; min-width: 340px; max-width: 580px; }
+.modal-head { background: #9d9d9d; color: #fff; padding: 7px 10px; font-weight: bold; }
+.modal-body { padding: 14px; }
+.modal-foot { padding: 10px; text-align: center; border-top: 1px solid #eee; }
+
+/* ---------- Escenarios de entrenamiento ---------- */
+.escenario { background: #fffbe6; border: 1px dashed #e0c86a; padding: 8px 10px; font-size: 11px; color: #6b5a1f; margin-bottom: 10px; }
+.escenario b { color: #8a6d1f; }
+.badge { display: inline-block; padding: 2px 7px; font-size: 10px; font-weight: bold; color: #fff; background: #777; }
+.badge-sim { background: #ffd200; color: #6b4b00; }
+.badge-ok { background: #2f8f2f; }
+.badge-err { background: #d52b1e; }
+.badge-warn { background: #e08a00; }
+.pordefinir { background: #ececec; border-left: 4px solid #999; padding: 6px 8px; font-size: 11px; color: #555; margin: 8px 0; }
+
+/* ---------- Diagrama de proceso ---------- */
+.diagrama { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px; }
+.dg-paso { background: #fff; border: 2px solid #3ea7b8; padding: 7px 14px; min-width: 330px; text-align: center; font-size: 12px; }
+.dg-dec { background: #fff8e1; border: 2px solid #e0b800; }
+.dg-fin { background: #e8f6e8; border: 2px solid #2f8f2f; }
+.dg-flecha { color: #777; font-size: 16px; }
+
+/* ---------- Constancia ---------- */
+.constancia { background: #fff; border: 1px solid #bbb; padding: 22px; max-width: 760px; margin: 0 auto; font-size: 12px; }
+.constancia h2 { text-align: center; font-size: 15px; margin: 0 0 4px; }
+.constancia .marca { text-align: center; color: #d52b1e; font-weight: bold; letter-spacing: 2px; margin-bottom: 14px; }
+.constancia table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+.constancia table td { padding: 5px 6px; border-bottom: 1px solid #eee; }
+.firma { margin-top: 40px; display: flex; justify-content: space-around; text-align: center; }
+.firma div { border-top: 1px solid #333; width: 220px; padding-top: 5px; }
+
+.footer-nota { text-align: center; font-size: 10px; color: #777; padding: 12px; }
+.login-wrap { display: flex; justify-content: center; padding: 40px 12px; }
+.login-box { width: 380px; background: #fff; border: 1px solid #c9c9c9; }
+.login-field { margin-bottom: 12px; }
+.login-field label { display: block; font-weight: bold; margin-bottom: 4px; }
+.login-demo { font-size: 11px; background: #fffbe6; border: 1px dashed #e0c86a; padding: 8px; margin-top: 10px; color: #6b5a1f; }

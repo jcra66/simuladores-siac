@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cambio de Titularidad - Página principal</title>
+<link rel="stylesheet" href="assets_css_styles.css">
+</head>
+<body>
+<div id="hdr"></div>
+<div id="ruta" class="ruta"></div>
+<div class="wrap">
+  <div class="col-cliente" id="ficha"></div>
+  <div class="col-main">
+    <div id="msgGlobal" class="oculto"></div>
+    <div class="panel">
+      <div class="panel-header">Cambio de Titularidad</div>
+      <div class="panel-body">
+        <div class="escenario">
+          <b>Escenario de entrenamiento (configurable):</b>
+          <label class="chk-inline"><input type="radio" name="esc" value="sin" checked onchange="cambiarEscenario()"> Perfil <b>sin</b> permiso: requiere envío y validación de PIN (3.2.6)</label>
+          <label class="chk-inline"><input type="radio" name="esc" value="con" onchange="cambiarEscenario()"> Perfil <b>con</b> permiso: "Su perfil no necesita esta validación" (3.2.5)</label>
+        </div>
+        <div id="msg" class="oculto"></div>
+
+        <div class="subpanel">
+          <div class="form-row">
+            <div class="form-group"><label>Motivo:</label>
+              <select id="motivo">
+                <option value="">Seleccionar</option>
+                <option>A solicitud del cliente</option>
+                <option>Fallecimiento del titular</option>
+                <option>Cesión de derechos</option>
+                <option>Venta de la línea</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="subpanel">
+          <div class="form-row">
+            <div class="form-group" style="flex:1 1 100%"><label>Solicitante:</label>
+              <span>
+                <label class="chk-inline"><input type="radio" name="sol" value="TIT" checked onchange="cambiarSolicitante()"> Titular</label>
+                <label class="chk-inline"><input type="radio" name="sol" value="CPA" onchange="cambiarSolicitante()"> Carta Poder/Contacto Autorizado</label>
+                <label class="chk-inline"><input type="radio" name="sol" value="REP" onchange="cambiarSolicitante()"> Representante Legal</label>
+              </span>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Nombres:</label><input type="text" id="nombres" maxlength="40" disabled></div>
+            <div class="form-group"><label>Apellidos:</label><input type="text" id="apellidos" maxlength="40" disabled></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Tipo Documento:</label>
+              <select id="tipoDoc" disabled><option>DNI</option><option>CE</option><option>PASAPORTE</option><option>RUC</option></select>
+            </div>
+            <div class="form-group"><label>N° Documento:</label><input type="text" id="nroDoc" maxlength="12" disabled></div>
+          </div>
+          <span class="badge badge-sim">DATOS SIMULADOS PARA ENTRENAMIENTO</span>
+        </div>
+
+        <div class="panel" id="panelPin">
+          <div class="panel-header">Ingrese el PIN de Validación</div>
+          <div class="panel-body">
+            <p><b>Para validar que la línea se encuentra activa, enviar el PIN de seguridad haciendo click en el siguiente botón:</b></p>
+            <div style="text-align:right">
+              <button type="button" class="btn" id="btnEnviarPin" onclick="enviarPin()">Enviar PIN</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="botonera" style="border-top:1px solid #eee">
+        <button type="button" class="btn btn-claro" onclick="SIAC.ir('CambioTitularidad_MenuTransaccionesCuenta.html','Transacciones por Cuenta')">Volver</button>
+        <button type="button" class="btn" onclick="cerrar()">&#8962; Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="footer-nota">ENTORNO DE ENTRENAMIENTO · Datos ficticios</div>
+
+<script src="assets_js_app.js"></script>
+<script>
+SIAC.initPantalla({ nombre: 'Cambio de Titularidad', paso: '3.2.5', menu: 'cuenta', linea: SIAC.CLIENTE.linea });
+SIAC.fichaCliente('ficha');
+
+function escenario() { return document.querySelector('input[name=esc]:checked').value; }
+
+function cambiarEscenario() {
+  var con = escenario() === 'con';
+  document.getElementById('btnEnviarPin').textContent = con ? 'Continuar' : 'Enviar PIN';
+  SIAC.mensaje('msg', '', '');
+}
+
+function cambiarSolicitante() {
+  var v = document.querySelector('input[name=sol]:checked').value;
+  var editable = (v === 'CPA');
+  ['nombres', 'apellidos', 'tipoDoc', 'nroDoc'].forEach(function (id) { document.getElementById(id).disabled = !editable; });
+  if (v === 'TIT' || v === 'REP') {
+    document.getElementById('nombres').value = 'JUAN';
+    document.getElementById('apellidos').value = 'PEREZ SIMULADO';
+    document.getElementById('tipoDoc').value = 'DNI';
+    document.getElementById('nroDoc').value = SIAC.CLIENTE.documento;
+  } else {
+    document.getElementById('nombres').value = '';
+    document.getElementById('apellidos').value = '';
+    document.getElementById('nroDoc').value = '';
+  }
+  SIAC.registrar('Cambio de Titularidad', 'Selecciona solicitante ' + v, 'OK');
+}
+cambiarSolicitante();
+
+function validar() {
+  if (!document.getElementById('motivo').value) {
+    SIAC.mensaje('msg', 'Debe seleccionar motivo.', 'error');
+    SIAC.registrar('Cambio de Titularidad', 'Enviar PIN sin motivo', 'ERROR: Debe seleccionar motivo');
+    return false;
+  }
+  var v = document.querySelector('input[name=sol]:checked').value;
+  if (v === 'CPA') {
+    var n = document.getElementById('nombres').value.trim(),
+        a = document.getElementById('apellidos').value.trim(),
+        d = document.getElementById('nroDoc').value.trim();
+    if (!n || !a || !d) {
+      SIAC.mensaje('msg', 'Debe ingresar nombres, apellidos y número de documento del solicitante con Carta Poder/Contacto Autorizado.', 'error');
+      SIAC.registrar('Cambio de Titularidad', 'Solicitante CPA incompleto', 'ERROR: Datos del solicitante incompletos');
+      return false;
+    }
+  }
+  SIAC.guardarDatos({
+    motivo: document.getElementById('motivo').value, solicitante: v,
+    solNombres: document.getElementById('nombres').value, solApellidos: document.getElementById('apellidos').value,
+    solTipoDoc: document.getElementById('tipoDoc').value, solNroDoc: document.getElementById('nroDoc').value
+  });
+  return true;
+}
+
+function enviarPin() {
+  if (!validar()) return;
+  if (escenario() === 'con') {
+    SIAC.registrar('Cambio de Titularidad', 'Perfil con permiso de omisión de PIN', 'OK: Su perfil no necesita esta validación');
+    SIAC.alerta('Su perfil no necesita esta validación.', 'Mensaje del sistema (SIMULADO)', function () {
+      SIAC.ir('CambioTitularidad_LineasCuentaOrigen.html', 'Líneas de la Cuenta Origen');
+    });
+    return;
+  }
+  var d = SIAC.datos();
+  var envios = (d.enviosPin || 0) + 1;
+  SIAC.guardarDatos({ enviosPin: envios });
+  if (envios > SIAC.MAX_ENVIOS_PIN) {
+    SIAC.registrar('Cambio de Titularidad', 'Envío de PIN N° ' + envios, 'ERROR: Se superó la cantidad máxima de envío');
+    SIAC.alerta('Se superó la cantidad máxima de envío.', 'Mensaje del sistema (SIMULADO)');
+    return;
+  }
+  SIAC.registrar('Cambio de Titularidad', 'Envío de PIN N° ' + envios, 'OK: Se envío PIN correctamente');
+  SIAC.alerta('Se envío PIN correctamente.', 'Mensaje del sistema (SIMULADO)', function () {
+    SIAC.ir('CambioTitularidad_ValidacionPin.html', 'Validación de PIN');
+  });
+}
+
+function cerrar() {
+  SIAC.confirmar('El botón <b>Cerrar</b> cierra la página de la transacción.<br>¿Desea finalizar la práctica como <b>Cancelada</b>?', function () {
+    SIAC.registrar('Cambio de Titularidad', 'Cerrar página', 'Cancelada por el asesor');
+    SIAC.cerrarEjecucion('Cancelada', false);
+    location.href = 'CambioTitularidad_EvaluacionAsesor.html';
+  });
+}
+</script>
+</body>
+</html>

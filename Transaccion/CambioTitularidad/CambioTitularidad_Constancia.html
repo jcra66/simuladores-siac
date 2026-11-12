@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cambio de Titularidad - Constancia</title>
+<link rel="stylesheet" href="assets_css_styles.css">
+</head>
+<body>
+<div id="hdr"></div>
+<div id="ruta" class="ruta"></div>
+<div class="wrap">
+  <div class="col-main">
+    <div id="msgGlobal" class="oculto"></div>
+    <div class="panel">
+      <div class="panel-header">3.2.24 / 3.2.25 CONSTANCIA DE CAMBIO DE TITULARIDAD</div>
+      <div class="panel-body">
+        <div id="msg" class="oculto"></div>
+        <div class="constancia" id="doc"></div>
+      </div>
+      <div class="botonera" style="border-top:1px solid #eee">
+        <button type="button" class="btn btn-claro" onclick="window.print()">Imprimir constancia</button>
+        <button type="button" class="btn" onclick="finalizar()">Finalizar prueba y ver evaluación</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="footer-nota">ENTORNO DE ENTRENAMIENTO · Documento simulado sin validez legal</div>
+
+<script src="assets_js_app.js"></script>
+<script>
+SIAC.initPantalla({ nombre: 'Constancia', paso: '3.2.24 / 3.2.25', menu: 'cuenta', linea: SIAC.CLIENTE.linea });
+
+var d = SIAC.datos();
+if (!d.grabado) {
+  SIAC.mensaje('msg', 'La constancia se emite luego de grabar la transacción (3.2.23). Se muestra una constancia de práctica.', 'warn');
+}
+var nt = d.identificacion || {};
+var fecha = SIAC.fechaTxt(d.fechaGrabado || new Date().toISOString());
+
+document.getElementById('doc').innerHTML =
+  '<h2>CONSTANCIA DE CAMBIO DE TITULARIDAD</h2>' +
+  '<div class="marca">DOCUMENTO SIMULADO PARA ENTRENAMIENTO &mdash; SIN VALIDEZ LEGAL</div>' +
+  '<table>' +
+  f('N° de transacción', d.nroTransaccion || 'CT-PRACTICA') +
+  f('Fecha de emisión', fecha) +
+  f('Motivo', d.motivo || '(no registrado)') +
+  f('Titular anterior', SIAC.CLIENTE.cliente + ' - ' + SIAC.CLIENTE.tipoDocumento + ' ' + SIAC.CLIENTE.documento) +
+  f('Nuevo titular', (nt.nombre || '') + ' ' + (nt.apellidos || '') + ' - ' + (nt.tipoDoc || '') + ' ' + (nt.nroDoc || '')) +
+  f('Cuenta destino', d.cuentaDestino ? d.cuentaDestino.cta : '(no registrada)') +
+  f('Modalidad', d.modalidad === 'CREAR_CUENTA' ? 'Creación de cuenta nueva' : 'Transferencia a cuenta existente') +
+  f('Líneas transferidas', (d.lineas || []).map(function (l) { return l.linea + ' (' + l.plan + ')'; }).join(', ') || '(ninguna)') +
+  f('Total reintegro Con IGV (S/)', d.totalReintegro || '0.00') +
+  f('Fecha de programación', d.fechaProgramacion || '(inmediata)') +
+  f('Envío de constancia', d.envioEmail ? 'Por correo: ' + (d.email || '') : 'Punto de atención: ' + (d.puntoAtencion || '(no seleccionado)')) +
+  f('Dirección de facturación', d.facturacion ? (d.facturacion.tipoCalle + ' ' + d.facturacion.nomCalle + ' ' + (d.facturacion.sn ? 'S/N' : d.facturacion.numero) + ', ' + d.facturacion.dist) : '(no registrada)') +
+  f('Notas', d.notas || '-') +
+  '</table>' +
+  '<p style="font-size:11px">El cliente declara haber sido informado de las condiciones del cambio de titularidad. ' +
+  'Las condiciones comerciales específicas aplicables al nuevo titular no están documentadas en el MDU: <b>[POR DEFINIR]</b>.</p>' +
+  '<div class="firma"><div>Firma del titular cedente</div><div>Firma del nuevo titular</div><div>Asesor de atención</div></div>';
+
+function f(k, v) { return '<tr><td style="width:40%"><b>' + k + ':</b></td><td>' + SIAC.esc(v) + '</td></tr>'; }
+
+function finalizar() {
+  SIAC.registrar('Constancia', 'Visualiza constancia y finaliza la prueba', 'Completada');
+  SIAC.cerrarEjecucion(d.grabado ? 'Completada' : 'Incompleta', false);
+  location.href = 'CambioTitularidad_EvaluacionAsesor.html';
+}
+</script>
+</body>
+</html>

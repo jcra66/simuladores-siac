@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cambio de Titularidad - Evaluación del Asesor</title>
+<link rel="stylesheet" href="assets_css_styles.css">
+</head>
+<body>
+<div class="training-bar">ENTORNO DE ENTRENAMIENTO &mdash; RESULTADO DE LA PRÁCTICA (SIMULADO)</div>
+<div class="siac-header">
+  <div class="siac-brand"><div class="siac-logo">Claro</div>
+    <div><div class="siac-title">SIAC ÚNICO</div>
+    <div class="siac-subtitle">EVALUACIÓN DEL ASESOR &mdash; CAMBIO DE TITULARIDAD</div></div></div>
+  <div class="siac-sesion" id="infoSesion"></div>
+</div>
+
+<div style="padding:12px">
+  <div id="msg" class="oculto"></div>
+
+  <div class="panel">
+    <div class="panel-header">RESULTADO DE LA SIMULACIÓN</div>
+    <div class="panel-body" id="resultado"></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">TIEMPO POR PANTALLA</div>
+    <div class="panel-body">
+      <table class="grid"><thead><tr><th style="width:60px">#</th><th>Pantalla</th><th style="width:150px">Tiempo</th></tr></thead>
+      <tbody id="tblPant"></tbody></table>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">RECORRIDO, ERRORES Y VALIDACIONES</div>
+    <div class="panel-body">
+      <table class="grid"><thead><tr><th style="width:170px">Fecha/Hora</th><th>Pantalla</th><th>Acción</th><th>Resultado</th></tr></thead>
+      <tbody id="tblEv"></tbody></table>
+    </div>
+  </div>
+
+  <div class="botonera">
+    <button type="button" class="btn" onclick="location.href='index.html'">Nueva práctica</button>
+    <button type="button" class="btn btn-claro" onclick="location.href='../../Reporte/GesReporte.html'">Ver reporte de trazabilidad</button>
+    <button type="button" class="btn btn-gris" onclick="location.href='../../index.html'">Volver al portal</button>
+  </div>
+</div>
+<div class="footer-nota">ENTORNO DE ENTRENAMIENTO · Rúbrica didáctica de demostración configurable</div>
+
+<script src="assets_js_app.js"></script>
+<script>
+var s = SIAC.sesion();
+if (s) {
+  document.getElementById('infoSesion').innerHTML = '<b>' + SIAC.esc(s.nombre) + '</b><br>Perfil: ' + SIAC.esc(s.perfil);
+}
+var ej = null;
+try { ej = JSON.parse(localStorage.getItem('SIAC_ULTIMA_EJEC')); } catch (e) { }
+
+if (!ej) {
+  SIAC.mensaje('msg', 'No se encontró una ejecución finalizada en este navegador. Inicie una práctica desde el inicio del simulador.', 'warn');
+  document.getElementById('resultado').innerHTML = '<div class="grid-empty">Sin datos de evaluación.</div>';
+} else {
+  var cls = ej.resultado === 'Aprobado' ? 'badge-ok' : (ej.resultado === 'Observado' ? 'badge-warn' : 'badge-err');
+  var errores = (ej.eventos || []).filter(function (e) { return String(e.resultado).indexOf('ERROR') === 0; });
+  var omis = (ej.eventos || []).filter(function (e) { return String(e.resultado).indexOf('OMITIDA') === 0; });
+
+  document.getElementById('resultado').innerHTML =
+    '<table class="grid"><tbody>' +
+    fila('Identificador de ejecución', ej.id) +
+    fila('Asesor', ej.asesor + ' (' + ej.usuario + ')') +
+    fila('Transacción', ej.trx + ' [' + ej.trxId + ']') +
+    fila('Estado de la prueba', ej.estado) +
+    fila('Inicio', SIAC.fechaTxt(ej.inicio)) +
+    fila('Fin', SIAC.fechaTxt(ej.fin)) +
+    fila('Tiempo total empleado', SIAC.hhmmss(ej.duracion)) +
+    fila('Pantallas visitadas', (ej.pantallas || []).length) +
+    fila('Pasos registrados', (ej.eventos || []).length) +
+    fila('Errores cometidos', ej.errores) +
+    fila('Validaciones omitidas', ej.omitidas) +
+    fila('Puntaje obtenido', '<b>' + ej.puntaje + '</b> / 100') +
+    fila('Calificación', '<span class="badge ' + cls + '">' + ej.resultado + '</span>') +
+    '</tbody></table>' +
+    '<div class="escenario" style="margin-top:10px"><b>Rúbrica didáctica de demostración (configurable):</b> ' +
+    'base ' + SIAC.RUBRICA.base + ' puntos, &minus;' + SIAC.RUBRICA.porError + ' por error, &minus;' + SIAC.RUBRICA.porOmision +
+    ' por validación omitida. Aprobado &ge; ' + SIAC.RUBRICA.aprobado + ', Observado &ge; ' + SIAC.RUBRICA.observado +
+    ', por debajo: Reforzar capacitación. <b>El MDU no documenta criterios de evaluación: [POR DEFINIR].</b></div>' +
+    '<h3 style="font-size:13px">Errores cometidos</h3>' +
+    (errores.length ? '<ul>' + errores.map(function (e) { return '<li>' + SIAC.esc(e.pantalla) + ': ' + SIAC.esc(e.resultado) + '</li>'; }).join('') + '</ul>'
+      : '<p>Sin errores registrados.</p>') +
+    '<h3 style="font-size:13px">Validaciones omitidas / reglas no cumplidas</h3>' +
+    (omis.length ? '<ul>' + omis.map(function (e) { return '<li>' + SIAC.esc(e.pantalla) + ': ' + SIAC.esc(e.accion) + '</li>'; }).join('') + '</ul>'
+      : '<p>Sin validaciones omitidas registradas.</p>');
+
+  document.getElementById('tblPant').innerHTML = (ej.pantallas || []).map(function (p, i) {
+    return '<tr><td>' + (i + 1) + '</td><td style="text-align:left">' + SIAC.esc(p.pantalla) + '</td><td>' + SIAC.hhmmss(p.seg) + '</td></tr>';
+  }).join('') || '<tr><td colspan="3" class="grid-empty">Sin registro por pantalla.</td></tr>';
+
+  document.getElementById('tblEv').innerHTML = (ej.eventos || []).map(function (e) {
+    var estilo = String(e.resultado).indexOf('ERROR') === 0 ? ' style="color:#a3251a;font-weight:bold"' : '';
+    return '<tr><td>' + SIAC.fechaTxt(e.ts) + '</td><td style="text-align:left">' + SIAC.esc(e.pantalla) +
+      '</td><td style="text-align:left">' + SIAC.esc(e.accion) + '</td><td' + estilo + ' style="text-align:left">' + SIAC.esc(e.resultado) + '</td></tr>';
+  }).join('') || '<tr><td colspan="4" class="grid-empty">Sin eventos.</td></tr>';
+}
+
+function fila(k, v) { return '<tr><td style="text-align:left;width:40%"><b>' + k + '</b></td><td style="text-align:left">' + v + '</td></tr>'; }
+</script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cambio de Titularidad - Acceso al Sistema SIACUNICO</title>
+<link rel="stylesheet" href="assets_css_styles.css">
+</head>
+<body>
+<div id="hdr"></div>
+<div id="ruta" class="ruta"></div>
+<div class="wrap">
+  <div class="col-main">
+    <div id="msgGlobal" class="oculto"></div>
+    <div class="panel">
+      <div class="panel-header">3.2.1 INGRESAR AL APLICATIVO DEL SIACUNICO</div>
+      <div class="panel-body">
+        <div class="escenario">
+          <b>Paso del MDU 3.2.1:</b> el asesor ingresa al aplicativo SIACUNICO con sus credenciales corporativas.
+          En el simulador las credenciales ya están cargadas como <b>DATO SIMULADO PARA ENTRENAMIENTO</b>.
+        </div>
+        <div id="msg" class="oculto"></div>
+        <div class="subpanel" style="max-width:460px;margin:0 auto">
+          <div class="form-row"><div class="form-group" style="flex:1 1 100%">
+            <label>Usuario:</label><input type="text" id="usr" readonly></div></div>
+          <div class="form-row"><div class="form-group" style="flex:1 1 100%">
+            <label>Contraseña:</label><input type="password" id="pwd" value="********" readonly></div></div>
+          <div class="form-row"><div class="form-group" style="flex:1 1 100%">
+            <label>Nodo:</label><input type="text" value="Nodo Corporativo (SIMULADO)" readonly></div></div>
+          <div class="botonera">
+            <button type="button" class="btn" onclick="ingresar()">Ingresar al SIACUNICO</button>
+          </div>
+        </div>
+      </div>
+      <div class="botonera" style="border-top:1px solid #eee">
+        <button type="button" class="btn btn-claro" onclick="SIAC.ir('CambioTitularidad_DiagramaProceso.html','Diagrama del Proceso')">Ver diagrama del proceso (3.2)</button>
+        <button type="button" class="btn btn-gris" onclick="location.href='index.html'">Volver al inicio del simulador</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="footer-nota">ENTORNO DE ENTRENAMIENTO · Datos ficticios</div>
+
+<script src="assets_js_app.js"></script>
+<script>
+var iniciar = /[?&]iniciar=1/.test(location.search);
+var ctx = SIAC.initPantalla({ nombre: 'Acceso al Sistema', paso: '3.2.1', iniciar: iniciar });
+if (ctx) {
+  document.getElementById('usr').value = ctx.sesion.usuario + ' (SIMULADO)';
+}
+function ingresar() {
+  SIAC.registrar('Acceso al Sistema', 'Ingreso al aplicativo SIACUNICO', 'OK');
+  SIAC.ir('CambioTitularidad_BusquedaCliente.html', 'Búsqueda de Cliente');
+}
+</script>
+</body>
+</html>

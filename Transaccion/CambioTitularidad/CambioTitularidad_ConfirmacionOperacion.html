@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cambio de Titularidad - Confirmación de la Operación</title>
+<link rel="stylesheet" href="assets_css_styles.css">
+</head>
+<body>
+<div id="hdr"></div>
+<div id="ruta" class="ruta"></div>
+<div class="wrap">
+  <div class="col-cliente" id="ficha"></div>
+  <div class="col-main">
+    <div id="msgGlobal" class="oculto"></div>
+    <div class="panel">
+      <div class="panel-header">3.2.21 a 3.2.23 CONFIRMACIÓN DE LA OPERACIÓN</div>
+      <div class="panel-body">
+        <div class="escenario">Presione <b>Guardar</b>; el sistema preguntará <b>"¿Está seguro de grabar?"</b> y al presionar <b>Aceptar</b> mostrará el mensaje de éxito.</div>
+        <div id="msg" class="oculto"></div>
+        <table class="grid" style="margin-bottom:10px">
+          <thead><tr><th>Concepto</th><th>Valor registrado (SIMULADO)</th></tr></thead>
+          <tbody id="resumen"></tbody>
+        </table>
+      </div>
+      <div class="botonera" style="border-top:1px solid #eee">
+        <button type="button" class="btn btn-claro" onclick="SIAC.ir('CambioTitularidad_DireccionFacturacion.html','Dirección de Facturación')">Volver</button>
+        <button type="button" class="btn btn-claro" id="btnGuardar" onclick="guardar()">&#128190; Guardar</button>
+        <button type="button" class="btn" onclick="cerrar()">&#8962; Cerrar</button>
+        <button type="button" class="btn btn-claro" id="btnConstancia" onclick="constancia()" disabled>&#128196; Constancia</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="footer-nota">ENTORNO DE ENTRENAMIENTO · Datos ficticios</div>
+
+<script src="assets_js_app.js"></script>
+<script>
+SIAC.initPantalla({ nombre: 'Confirmación de Operación', paso: '3.2.21 a 3.2.23', menu: 'cuenta', linea: SIAC.CLIENTE.linea });
+SIAC.fichaCliente('ficha');
+
+var d = SIAC.datos();
+function fila(k, v) { return '<tr><td style="text-align:left">' + k + '</td><td style="text-align:left">' + SIAC.esc(v || '(no registrado)') + '</td></tr>'; }
+document.getElementById('resumen').innerHTML =
+  fila('Línea consultada', d.lineaConsultada || SIAC.CLIENTE.linea) +
+  fila('Motivo', d.motivo) +
+  fila('Solicitante', d.solicitante === 'CPA' ? 'Carta Poder/Contacto Autorizado' : (d.solicitante === 'REP' ? 'Representante Legal' : 'Titular')) +
+  fila('Validación', d.pinValidado ? 'PIN validado conforme' : (d.validacionSupervisor ? 'Validación de Jefe/Supervisor' : 'Perfil sin validación de PIN')) +
+  fila('Líneas a transferir', (d.lineas || []).map(function (l) { return l.linea + ' - ' + l.plan; }).join(' | ')) +
+  fila('Total reintegro Con IGV (S/)', d.totalReintegro) +
+  fila('Modalidad', d.modalidad === 'CREAR_CUENTA' ? 'Crear Cuenta' : 'Transferir en Cuenta Existente') +
+  fila('Cuenta destino', d.cuentaDestino ? (d.cuentaDestino.cta + ' - ' + d.cuentaDestino.tit) : '') +
+  fila('Nuevo titular', d.identificacion ? (d.identificacion.nombre + ' ' + d.identificacion.apellidos + ' - ' + d.identificacion.tipoDoc + ' ' + d.identificacion.nroDoc) : '') +
+  fila('Email de contacto', d.contacto ? d.contacto.email : '') +
+  fila('Dirección de domicilio', d.domicilio ? (d.domicilio.tipoCalle + ' ' + d.domicilio.nomCalle + ' ' + (d.domicilio.sn ? 'S/N' : d.domicilio.numero) + ', ' + d.domicilio.dist + ' - ' + d.domicilio.prov + ' - ' + d.domicilio.dep) : '') +
+  fila('Dirección de facturación', d.facturacion ? (d.facturacion.tipoCalle + ' ' + d.facturacion.nomCalle + ' ' + (d.facturacion.sn ? 'S/N' : d.facturacion.numero) + ', ' + d.facturacion.dist + ' - ' + d.facturacion.prov + ' - ' + d.facturacion.dep) : '') +
+  fila('Fecha de Programación', d.fechaProgramacion) +
+  fila('Envío por E-mail', d.envioEmail ? 'Sí - ' + (d.email || '') : 'No') +
+  fila('Punto de Atención', d.puntoAtencion) +
+  fila('Notas', d.notas);
+
+if (SIAC.datos().grabado) habilitarConstancia();
+
+function guardar() {
+  var dd = SIAC.datos();
+  if (!dd.lineas || !dd.lineas.length) {
+    SIAC.mensaje('msg', 'Debe seleccionar al menos una linea.', 'error');
+    SIAC.registrar('Confirmación de Operación', 'Guardar sin líneas', 'ERROR: Debe seleccionar al menos una linea');
+    return;
+  }
+  if (!dd.cuentaDestino) {
+    SIAC.mensaje('msg', 'Debe seleccionar una cuenta destino.', 'error');
+    SIAC.registrar('Confirmación de Operación', 'Guardar sin cuenta destino', 'ERROR: Debe seleccionar una cuenta destino');
+    return;
+  }
+  if (!dd.facturacion) SIAC.registrarOmision('Confirmación de Operación', 'Graba sin completar Dirección de Facturación');
+
+  SIAC.confirmar('¿Está seguro de grabar?', function () {
+    SIAC.registrar('Confirmación de Operación', 'Confirma grabar (Aceptar)', 'OK');
+    var nro = 'CT-' + Date.now().toString().slice(-8);
+    SIAC.guardarDatos({ grabado: true, nroTransaccion: nro, fechaGrabado: new Date().toISOString() });
+    SIAC.alerta('La transacción se registró satisfactoriamente.<br>N° de transacción: <b>' + nro + ' (SIMULADO)</b>', 'Mensaje de éxito (SIMULADO)', function () {
+      SIAC.mensaje('msg', 'La transacción se registró satisfactoriamente. Presione <b>Constancia</b> para visualizarla.', 'ok');
+      habilitarConstancia();
+    });
+  });
+}
+
+function habilitarConstancia() {
+  document.getElementById('btnConstancia').disabled = false;
+  document.getElementById('btnGuardar').disabled = true;
+}
+
+function constancia() {
+  SIAC.registrar('Confirmación de Operación', 'Presiona Constancia', 'OK');
+  SIAC.ir('CambioTitularidad_Constancia.html', 'Constancia');
+}
+
+function cerrar() {
+  SIAC.confirmar('¿Desea cerrar la página? Si la transacción no fue grabada, la práctica se registrará como <b>Cancelada</b>.', function () {
+    var dd = SIAC.datos();
+    SIAC.registrar('Confirmación de Operación', 'Cerrar página', dd.grabado ? 'OK' : 'Cancelada por el asesor');
+    SIAC.cerrarEjecucion(dd.grabado ? 'Completada' : 'Cancelada', false);
+    location.href = 'CambioTitularidad_EvaluacionAsesor.html';
+  });
+}
+</script>
+</body>
+</html>

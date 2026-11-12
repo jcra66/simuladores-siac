@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cambio de Titularidad - Validación de PIN</title>
+<link rel="stylesheet" href="assets_css_styles.css">
+</head>
+<body>
+<div id="hdr"></div>
+<div id="ruta" class="ruta"></div>
+<div class="wrap">
+  <div class="col-cliente" id="ficha"></div>
+  <div class="col-main">
+    <div id="msgGlobal" class="oculto"></div>
+    <div class="panel">
+      <div class="panel-header">Ingrese el PIN de Validación (3.2.6 a 3.2.9)</div>
+      <div class="panel-body">
+        <div class="escenario">
+          PIN correcto para la práctica: <b>1234 (SIMULADO)</b>. Pruebe también un PIN incorrecto para reconocer el mensaje de error.
+          Tras el <b>segundo intento fallido</b> se habilita el enlace <b>¿No recibió PIN?</b> para la validación de Jefe/Supervisor.
+        </div>
+        <div id="msg" class="oculto"></div>
+        <div class="subpanel">
+          <div class="form-row">
+            <div class="form-group"><label>Código PIN:</label>
+              <input type="text" id="pin" maxlength="4" placeholder="4 dígitos enviados por SMS">
+            </div>
+            <div class="form-group" style="flex:0 0 330px">
+              <button type="button" class="btn" id="btnValidar" onclick="validarPin()">Validar PIN</button>
+              <button type="button" class="btn btn-claro" id="btnEnviar" onclick="reenviar()" disabled>Enviar PIN</button>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group" style="flex:1 1 100%">
+              <a href="javascript:void(0)" id="lnkNoRecibio" class="enlace-seccion oculto" onclick="noRecibio()">¿No recibió PIN?</a>
+            </div>
+          </div>
+          <div style="font-size:11px;color:#666">Intentos fallidos: <b id="intentos">0</b> &nbsp;|&nbsp; Envíos de PIN realizados: <b id="envios">1</b> (máximo <b id="maxEnv"></b>)</div>
+        </div>
+      </div>
+      <div class="botonera" style="border-top:1px solid #eee">
+        <button type="button" class="btn btn-claro" onclick="SIAC.ir('CambioTitularidad_CambioTitularidad.html','Cambio de Titularidad')">Volver</button>
+        <button type="button" class="btn" onclick="cerrar()">&#8962; Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="footer-nota">ENTORNO DE ENTRENAMIENTO · Datos ficticios</div>
+
+<script src="assets_js_app.js"></script>
+<script>
+SIAC.initPantalla({ nombre: 'Validación de PIN', paso: '3.2.6 a 3.2.9', menu: 'cuenta', linea: SIAC.CLIENTE.linea });
+SIAC.fichaCliente('ficha');
+document.getElementById('maxEnv').textContent = SIAC.MAX_ENVIOS_PIN;
+
+function pintarContadores() {
+  var d = SIAC.datos();
+  document.getElementById('intentos').textContent = d.intentosPin || 0;
+  document.getElementById('envios').textContent = d.enviosPin || 1;
+  if ((d.intentosPin || 0) >= 2) document.getElementById('lnkNoRecibio').className = 'enlace-seccion';
+}
+pintarContadores();
+
+function validarPin() {
+  var v = document.getElementById('pin').value.trim();
+  var d = SIAC.datos();
+  if (!v) {
+    SIAC.mensaje('msg', 'Debe ingresar el código PIN enviado por SMS.', 'error');
+    SIAC.registrar('Validación de PIN', 'Validar sin ingresar PIN', 'ERROR: Debe ingresar el código PIN');
+    return;
+  }
+  if (v === SIAC.PIN_VALIDO) {
+    SIAC.registrar('Validación de PIN', 'Validar PIN', 'OK: Validación de PIN Conforme');
+    SIAC.guardarDatos({ pinValidado: true });
+    SIAC.alerta('Validación de PIN Conforme.', 'Mensaje del sistema (SIMULADO)', function () {
+      SIAC.ir('CambioTitularidad_LineasCuentaOrigen.html', 'Líneas de la Cuenta Origen');
+    });
+    return;
+  }
+  var intentos = (d.intentosPin || 0) + 1;
+  SIAC.guardarDatos({ intentosPin: intentos });
+  document.getElementById('pin').value = '';                 // se borra el PIN ingresado
+  document.getElementById('btnEnviar').disabled = false;     // se habilita el botón ENVIAR PIN
+  SIAC.mensaje('msg', 'PIN inválido o incorrecto. Ingrese un PIN válido.', 'error');
+  SIAC.registrar('Validación de PIN', 'Intento fallido N° ' + intentos, 'ERROR: PIN inválido o incorrecto. Ingrese un PIN válido');
+  pintarContadores();
+  if (intentos >= 2) {
+    SIAC.mensaje('msg', 'PIN inválido o incorrecto. Ingrese un PIN válido.<br>' +
+      'No se pudo validar el PIN por segunda vez: utilice el enlace <b>¿No recibió PIN?</b> para la validación de Jefe/Supervisor.', 'error');
+  }
+}
+
+function reenviar() {
+  var d = SIAC.datos();
+  var envios = (d.enviosPin || 1) + 1;
+  if (envios > SIAC.MAX_ENVIOS_PIN) {
+    SIAC.registrar('Validación de PIN', 'Reenvío de PIN N° ' + envios, 'ERROR: Se superó la cantidad máxima de envío');
+    SIAC.alerta('Se superó la cantidad máxima de envío.', 'Mensaje del sistema (SIMULADO)');
+    return;
+  }
+  SIAC.guardarDatos({ enviosPin: envios });
+  SIAC.registrar('Validación de PIN', 'Reenvío de PIN N° ' + envios, 'OK: Se envío PIN correctamente');
+  SIAC.alerta('Se envío PIN correctamente.', 'Mensaje del sistema (SIMULADO)');
+  pintarContadores();
+}
+
+function noRecibio() {
+  SIAC.registrar('Validación de PIN', 'Presiona ¿No recibió PIN?', 'OK: solicita validación de Jefe/Supervisor');
+  SIAC.ir('CambioTitularidad_ValidacionSupervisor.html', 'Validación de Jefe/Supervisor');
+}
+
+function cerrar() {
+  SIAC.confirmar('¿Desea cerrar la transacción y finalizar la práctica como <b>Cancelada</b>?', function () {
+    SIAC.registrar('Validación de PIN', 'Cerrar transacción', 'Cancelada por el asesor');
+    SIAC.cerrarEjecucion('Cancelada', false);
+    location.href = 'CambioTitularidad_EvaluacionAsesor.html';
+  });
+}
+</script>
+</body>
+</html>

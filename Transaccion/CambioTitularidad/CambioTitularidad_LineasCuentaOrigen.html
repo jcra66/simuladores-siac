@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cambio de Titularidad - Líneas de la Cuenta Origen</title>
+<link rel="stylesheet" href="assets_css_styles.css">
+</head>
+<body>
+<div id="hdr"></div>
+<div id="ruta" class="ruta"></div>
+<div class="wrap">
+  <div class="col-cliente" id="ficha"></div>
+  <div class="col-main">
+    <div id="msgGlobal" class="oculto"></div>
+
+    <div class="panel">
+      <div class="panel-header">Lineas de la Cuenta Origen (3.2.13 a 3.2.15)</div>
+      <div class="panel-body">
+        <div class="escenario">Seleccione una o varias líneas a transferir. Luego elija <b>Transferir en Cuenta Existente</b> o <b>Crear Cuenta</b>.</div>
+        <div id="msg" class="oculto"></div>
+        <table class="grid">
+          <thead><tr>
+            <th style="width:60px"><input type="checkbox" id="chkAll" onclick="marcarTodo(this)"></th>
+            <th>PLAN</th><th>LINEA</th><th>REINTEGRO</th>
+          </tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+        <div class="total-reintegro">Total reintegro Con IGV(S/): <span id="totReintegro">0.00</span></div>
+
+        <div class="subpanel">
+          <div class="form-row">
+            <div class="form-group" style="flex:0 0 260px">
+              <button type="button" class="btn btn-claro" onclick="evaluacion()">Evaluación</button>
+            </div>
+            <div class="form-group"><label>Sec:</label><input type="text" id="sec" value="" readonly placeholder="&#128683;"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group" style="flex:0 0 260px">
+              <button type="button" class="btn btn-claro" onclick="crearCuenta()">Crear Cuenta</button>
+            </div>
+            <div class="form-group" style="flex:0 0 300px">
+              <button type="button" class="btn btn-claro" onclick="transferir()">Transferir en Cuenta Existente</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="subpanel">
+          <div class="form-row">
+            <div class="form-group"><label>Fecha de Programación:</label><input type="date" id="fecProg"></div>
+            <div class="form-group"><label><input type="checkbox" id="chkMail" checked onchange="toggleMail()"> Envío por E-mail:</label>
+              <input type="text" id="email" maxlength="60"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Punto de Atención:</label>
+              <select id="punto"><option value="">Seleccionar</option><option>CAC Lima Centro (SIMULADO)</option><option>CAC Miraflores (SIMULADO)</option><option>CAC San Juan de Miraflores (SIMULADO)</option></select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group" style="flex:1 1 100%"><label>Notas:</label><textarea id="notas" placeholder="Agregar Notas"></textarea></div>
+          </div>
+        </div>
+      </div>
+      <div class="botonera" style="border-top:1px solid #eee">
+        <button type="button" class="btn btn-claro" onclick="guardar()">&#128190; Guardar</button>
+        <button type="button" class="btn" onclick="cerrar()">&#8962; Cerrar</button>
+        <button type="button" class="btn btn-claro" onclick="constancia()">&#128196; Constancia</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="footer-nota">ENTORNO DE ENTRENAMIENTO · Datos ficticios</div>
+
+<script src="assets_js_app.js"></script>
+<script>
+SIAC.initPantalla({ nombre: 'Líneas de la Cuenta Origen', paso: '3.2.13 a 3.2.15', menu: 'cuenta', linea: SIAC.CLIENTE.linea });
+SIAC.fichaCliente('ficha');
+
+var LINEAS = [
+  { plan: 'Claro Max 99 (SF)', linea: '987654321', reintegro: 0 },
+  { plan: 'Claro Max 69 (SF)', linea: '987654322', reintegro: 25.50 },
+  { plan: 'Claro Full 129 (SF)', linea: '987654323', reintegro: 0 }
+];
+document.getElementById('tbody').innerHTML = LINEAS.map(function (l, i) {
+  return '<tr><td><input type="checkbox" class="chkL" data-i="' + i + '" onchange="recalcular()"></td>' +
+    '<td>' + l.plan + '</td><td>' + l.linea + '</td><td>' + l.reintegro.toFixed(2) + '</td></tr>';
+}).join('');
+document.getElementById('email').value = SIAC.CLIENTE.email;
+document.getElementById('fecProg').value = new Date().toISOString().substring(0, 10);
+
+function seleccionadas() {
+  return Array.prototype.slice.call(document.querySelectorAll('.chkL:checked'))
+    .map(function (c) { return LINEAS[Number(c.getAttribute('data-i'))]; });
+}
+function marcarTodo(c) {
+  Array.prototype.forEach.call(document.querySelectorAll('.chkL'), function (x) { x.checked = c.checked; });
+  recalcular();
+}
+function recalcular() {
+  var t = seleccionadas().reduce(function (m, l) { return m + l.reintegro; }, 0);
+  document.getElementById('totReintegro').textContent = t.toFixed(2);
+  Array.prototype.forEach.call(document.querySelectorAll('.chkL'), function (c) {
+    c.parentNode.parentNode.className = c.checked ? 'sel' : '';
+  });
+  SIAC.guardarDatos({ lineas: seleccionadas(), totalReintegro: t.toFixed(2) });
+}
+function toggleMail() {
+  document.getElementById('email').disabled = !document.getElementById('chkMail').checked;
+}
+
+function validarSeleccion() {
+  if (!seleccionadas().length) {
+    SIAC.mensaje('msg', 'Debe seleccionar al menos una linea.', 'error');
+    SIAC.registrar('Líneas de la Cuenta Origen', 'Continuar sin seleccionar línea', 'ERROR: Debe seleccionar al menos una linea');
+    return false;
+  }
+  SIAC.guardarDatos({
+    fechaProgramacion: document.getElementById('fecProg').value,
+    envioEmail: document.getElementById('chkMail').checked,
+    email: document.getElementById('email').value,
+    puntoAtencion: document.getElementById('punto').value,
+    notas: document.getElementById('notas').value
+  });
+  return true;
+}
+
+function evaluacion() {
+  SIAC.registrar('Líneas de la Cuenta Origen', 'Presiona Evaluación', 'OK: redirección a SISACT (SIMULADA)');
+  SIAC.alerta('El botón <b>Evaluación</b> redirecciona a <b>SISACT</b> para realizar la evaluación crediticia al nuevo titular.<br><br>' +
+    '<span class="badge badge-sim">REDIRECCIÓN SIMULADA</span> El detalle de la evaluación crediticia en SISACT no forma parte de este MDU: <b>[POR DEFINIR]</b>.',
+    'Evaluación crediticia (SIMULADO)');
+}
+
+function transferir() {
+  if (!validarSeleccion()) return;
+  SIAC.guardarDatos({ modalidad: 'CUENTA_EXISTENTE' });
+  SIAC.registrar('Líneas de la Cuenta Origen', 'Presiona Transferir en Cuenta Existente', 'OK');
+  SIAC.ir('CambioTitularidad_TransferirCuentaExistente.html', 'Transferir en Cuenta Existente');
+}
+
+function crearCuenta() {
+  if (!validarSeleccion()) return;
+  SIAC.guardarDatos({ modalidad: 'CREAR_CUENTA' });
+  SIAC.registrar('Líneas de la Cuenta Origen', 'Presiona Crear Cuenta', 'OK');
+  SIAC.ir('CambioTitularidad_CrearCuenta.html', 'Crear Cuenta');
+}
+
+function guardar() {
+  if (!validarSeleccion()) return;
+  var d = SIAC.datos();
+  if (!d.modalidad) {
+    SIAC.mensaje('msg', 'Debe seleccionar una cuenta destino (Transferir en Cuenta Existente) o Crear Cuenta antes de guardar.', 'error');
+    SIAC.registrar('Líneas de la Cuenta Origen', 'Guardar sin cuenta destino', 'ERROR: Debe seleccionar una cuenta destino');
+    return;
+  }
+  SIAC.ir('CambioTitularidad_ConfirmacionOperacion.html', 'Confirmación de Operación');
+}
+
+function constancia() {
+  var d = SIAC.datos();
+  if (!d.grabado) {
+    SIAC.mensaje('msg', 'La constancia se habilita luego de grabar la transacción (paso 3.2.23 del MDU).', 'warn');
+    SIAC.registrarOmision('Líneas de la Cuenta Origen', 'Intenta Constancia antes de grabar');
+    return;
+  }
+  SIAC.ir('CambioTitularidad_Constancia.html', 'Constancia');
+}
+
+function cerrar() {
+  SIAC.confirmar('¿Desea cerrar la página y finalizar la práctica como <b>Cancelada</b>?', function () {
+    SIAC.registrar('Líneas de la Cuenta Origen', 'Cerrar página', 'Cancelada por el asesor');
+    SIAC.cerrarEjecucion('Cancelada', false);
+    location.href = 'CambioTitularidad_EvaluacionAsesor.html';
+  });
+}
+recalcular();
+</script>
+</body>
+</html>

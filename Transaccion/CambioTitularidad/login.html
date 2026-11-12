@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulador Cambio de Titularidad - Acceso</title>
+<link rel="stylesheet" href="assets_css_styles.css">
+</head>
+<body>
+<div class="training-bar">ENTORNO DE ENTRENAMIENTO &mdash; SIMULADOR SIAC ÚNICO · DATOS SIMULADOS</div>
+<div class="siac-header">
+  <div class="siac-brand"><div class="siac-logo">Claro</div>
+    <div><div class="siac-title">SIAC ÚNICO</div>
+    <div class="siac-subtitle">SIMULADOR DE CAPACITACIÓN &mdash; CAMBIO DE TITULARIDAD</div></div>
+  </div>
+</div>
+
+<div class="login-wrap">
+  <div class="login-box">
+    <div class="panel-header" style="text-align:center">ACCESO AL SIMULADOR DE LA TRANSACCIÓN</div>
+    <div class="panel-body">
+      <div id="msg" class="oculto"></div>
+      <div id="sesionPortal" class="oculto"></div>
+      <form id="frm" autocomplete="off">
+        <div class="login-field"><label>Usuario <span class="obligatorio">(*)</span></label><input type="text" id="u" maxlength="30"></div>
+        <div class="login-field"><label>Contraseña <span class="obligatorio">(*)</span></label><input type="password" id="c" maxlength="30"></div>
+        <div class="botonera"><button type="submit" class="btn">Ingresar</button></div>
+      </form>
+      <div class="login-demo">
+        <b>CREDENCIALES SOLO DEMOSTRACIÓN</b><br>
+        asesor01 / Asesor123! &nbsp;·&nbsp; asesor02 / Asesor123! &nbsp;·&nbsp; admin.demo / Admin123!
+      </div>
+      <div class="msg msg-warn" style="margin-top:10px">
+        Login autónomo del paquete. Si usted ingresó desde el portal de entrenamiento con una sesión válida del mismo navegador,
+        puede continuar sin volver a autenticarse.
+      </div>
+    </div>
+  </div>
+</div>
+<div class="footer-nota">Paquete autónomo &mdash; Transaccion/CambioTitularidad/ · MDU_SIAC_UNICO_CambioTitularidad _v2.docx</div>
+
+<script src="assets_js_app.js"></script>
+<script>
+function param(n) { var m = new RegExp('[?&]' + n + '=([^&]*)').exec(location.search); return m ? m[1] : null; }
+var m = param('msg');
+if (m === 'sesion') SIAC.mensaje('msg', 'Debe autenticarse para iniciar la prueba.', 'warn');
+if (m === 'salida') SIAC.mensaje('msg', 'Sesión finalizada correctamente.', 'ok');
+if (m === 'denegado') SIAC.mensaje('msg', 'El perfil autenticado no tiene el permiso <code>transaccion.CAMTIT.ejecutar</code>.', 'error');
+
+var s = SIAC.sesion();
+if (s && s.permisos && s.permisos.indexOf('transaccion.CAMTIT.ejecutar') >= 0) {
+  var d = document.getElementById('sesionPortal');
+  d.className = 'msg msg-ok';
+  d.innerHTML = 'Sesión activa detectada: <b>' + SIAC.esc(s.nombre) + '</b> (perfil ' + SIAC.esc(s.perfil) + ').<br><br>' +
+    '<button type="button" class="btn" onclick="location.href=\'index.html\'">Continuar con la sesión del portal</button>';
+}
+
+document.getElementById('frm').onsubmit = function (e) {
+  e.preventDefault();
+  var r = SIAC.ingresoAutonomo(document.getElementById('u').value.trim(), document.getElementById('c').value);
+  if (!r.ok) { SIAC.mensaje('msg', r.msg, 'error'); document.getElementById('c').value = ''; return; }
+  location.href = 'index.html';
+};
+</script>
+</body>
+</html>

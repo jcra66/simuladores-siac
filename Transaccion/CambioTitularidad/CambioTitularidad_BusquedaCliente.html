@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cambio de Titularidad - Búsqueda de Cliente</title>
+<link rel="stylesheet" href="assets_css_styles.css">
+</head>
+<body>
+<div id="hdr"></div>
+<div id="ruta" class="ruta"></div>
+<div class="wrap">
+  <div class="col-main">
+    <div id="msgGlobal" class="oculto"></div>
+    <div class="panel">
+      <div class="panel-header">3.2.2 PANTALLA PRINCIPAL &mdash; CONSULTA POR N° DE LÍNEA</div>
+      <div class="panel-body">
+        <div class="escenario">
+          Ingrese el número a consultar y presione <b>Enter</b> o el botón de búsqueda.
+          Línea del caso de práctica: <b>987654321 (SIMULADO)</b>.
+        </div>
+        <div id="msg" class="oculto"></div>
+        <div class="subpanel">
+          <div class="form-row">
+            <div class="form-group" style="flex:0 0 180px"><label>Buscar por:</label>
+              <select id="tipoBusqueda"><option>Teléfono</option><option>Documento</option><option>Cuenta</option></select>
+            </div>
+            <div class="form-group" style="flex:1 1 320px"><label>Número:</label>
+              <input type="text" id="nroLinea" maxlength="12" placeholder="Ingrese el número y presione Enter">
+            </div>
+            <div class="form-group" style="flex:0 0 160px">
+              <button type="button" class="btn" onclick="buscar()">Buscar</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="resultado" class="oculto">
+          <div class="panel">
+            <div class="panel-header"><span class="icono">&#128100;</span>Datos del Cliente - Postpago</div>
+            <div class="panel-body">
+              <div class="form-row">
+                <div class="form-group"><label>Cliente:</label><input type="text" id="rCliente" readonly></div>
+                <div class="form-group"><label>Cuenta:</label><input type="text" id="rCuenta" readonly></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>DNI/RUC:</label><input type="text" id="rDoc" readonly></div>
+                <div class="form-group"><label>Producto:</label><input type="text" id="rProd" readonly></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>Ciclo Fact.:</label><input type="text" id="rCiclo" readonly></div>
+                <div class="form-group"><label>Estado de Línea:</label><input type="text" id="rEstado" readonly></div>
+              </div>
+              <span class="badge badge-sim">DATO SIMULADO PARA ENTRENAMIENTO</span>
+            </div>
+            <div class="botonera">
+              <button type="button" class="btn" onclick="SIAC.ir('CambioTitularidad_MenuTransaccionesCuenta.html','Menú Transacciones por Cuenta')">Continuar al menú Transacciones por Cuenta</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="botonera" style="border-top:1px solid #eee">
+        <button type="button" class="btn btn-claro" onclick="SIAC.ir('CambioTitularidad_AccesoSistema.html','Acceso al Sistema')">Volver</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="footer-nota">ENTORNO DE ENTRENAMIENTO · Datos ficticios</div>
+
+<script src="assets_js_app.js"></script>
+<script>
+SIAC.initPantalla({ nombre: 'Búsqueda de Cliente', paso: '3.2.2' });
+var campo = document.getElementById('nroLinea');
+campo.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); buscar(); } });
+
+function buscar() {
+  var v = campo.value.trim();
+  if (!v) {
+    SIAC.mensaje('msg', 'Debe ingresar el número a consultar.', 'error');
+    SIAC.registrar('Búsqueda de Cliente', 'Buscar sin número', 'ERROR: Debe ingresar el número a consultar');
+    return;
+  }
+  if (v !== SIAC.CLIENTE.linea) {
+    SIAC.mensaje('msg', 'No se encontró ningún resultado. (Mensaje del MDU: "No se encontró ningún resultado")<br>' +
+      'Para la práctica utilice la línea <b>' + SIAC.CLIENTE.linea + ' (SIMULADO)</b>.', 'error');
+    document.getElementById('resultado').className = 'oculto';
+    SIAC.registrar('Búsqueda de Cliente', 'Consulta línea ' + v, 'ERROR: No se encontró ningún resultado');
+    return;
+  }
+  SIAC.mensaje('msg', 'Consulta realizada correctamente.', 'ok');
+  document.getElementById('rCliente').value = SIAC.CLIENTE.cliente;
+  document.getElementById('rCuenta').value = SIAC.CLIENTE.cuenta;
+  document.getElementById('rDoc').value = SIAC.CLIENTE.documento;
+  document.getElementById('rProd').value = SIAC.CLIENTE.producto;
+  document.getElementById('rCiclo').value = SIAC.CLIENTE.cicloFacturacion;
+  document.getElementById('rEstado').value = SIAC.CLIENTE.estadoLinea;
+  document.getElementById('resultado').className = '';
+  SIAC.guardarDatos({ lineaConsultada: v });
+  SIAC.registrar('Búsqueda de Cliente', 'Consulta línea ' + v, 'OK: cliente encontrado');
+}
+</script>
+</body>
+</html>

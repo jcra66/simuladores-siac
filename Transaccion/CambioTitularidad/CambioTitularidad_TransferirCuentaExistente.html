@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cambio de Titularidad - Transferir en Cuenta Existente</title>
+<link rel="stylesheet" href="assets_css_styles.css">
+</head>
+<body>
+<div id="hdr"></div>
+<div id="ruta" class="ruta"></div>
+<div class="wrap">
+  <div class="col-cliente" id="ficha"></div>
+  <div class="col-main">
+    <div id="msgGlobal" class="oculto"></div>
+    <div class="panel">
+      <div class="panel-header">3.2.16 TRANSFERIR EN CUENTA EXISTENTE</div>
+      <div class="panel-body">
+        <div class="escenario">Se presiona <b>Transferir en Cuenta Existente</b> cuando el cliente desea transferir sus líneas a una de sus cuentas.</div>
+        <div id="msg" class="oculto"></div>
+        <table class="grid">
+          <thead><tr><th style="width:60px">Sel.</th><th>CUENTA</th><th>TITULAR</th><th>TIPO</th><th>ESTADO</th></tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+        <div class="subpanel" style="margin-top:10px">
+          <div class="form-row">
+            <div class="form-group"><label>Líneas a transferir:</label><input type="text" id="lineasSel" readonly></div>
+            <div class="form-group"><label>Cuenta destino:</label><input type="text" id="cuentaSel" readonly placeholder="Seleccione una cuenta"></div>
+          </div>
+        </div>
+      </div>
+      <div class="botonera" style="border-top:1px solid #eee">
+        <button type="button" class="btn btn-claro" onclick="SIAC.ir('CambioTitularidad_LineasCuentaOrigen.html','Líneas de la Cuenta Origen')">Volver</button>
+        <button type="button" class="btn" onclick="continuar()">Continuar</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="footer-nota">ENTORNO DE ENTRENAMIENTO · Datos ficticios</div>
+
+<script src="assets_js_app.js"></script>
+<script>
+SIAC.initPantalla({ nombre: 'Transferir en Cuenta Existente', paso: '3.2.16', menu: 'cuenta', linea: SIAC.CLIENTE.linea });
+SIAC.fichaCliente('ficha');
+
+var CUENTAS = [
+  { cta: '8.15135802.01', tit: 'JUAN PEREZ SIMULADO', tipo: 'Consumer', est: 'Activa' },
+  { cta: '8.15135802.02', tit: 'MARIA LOPEZ SIMULADA', tipo: 'Consumer', est: 'Activa' },
+  { cta: '8.15135802.03', tit: 'JUAN PEREZ SIMULADO', tipo: 'Consumer', est: 'Suspendida' }
+];
+document.getElementById('tbody').innerHTML = CUENTAS.map(function (c, i) {
+  return '<tr><td><input type="radio" name="cta" value="' + i + '" onchange="elegir(' + i + ')"></td>' +
+    '<td>' + c.cta + '</td><td>' + c.tit + '</td><td>' + c.tipo + '</td><td>' + c.est + '</td></tr>';
+}).join('');
+
+var d = SIAC.datos();
+document.getElementById('lineasSel').value = (d.lineas || []).map(function (l) { return l.linea; }).join(', ') || '(sin líneas)';
+
+function elegir(i) {
+  document.getElementById('cuentaSel').value = CUENTAS[i].cta + ' - ' + CUENTAS[i].tit;
+  Array.prototype.forEach.call(document.querySelectorAll('#tbody tr'), function (tr, j) { tr.className = (i === j) ? 'sel' : ''; });
+  SIAC.guardarDatos({ cuentaDestino: CUENTAS[i] });
+  SIAC.registrar('Transferir en Cuenta Existente', 'Selecciona cuenta destino ' + CUENTAS[i].cta, 'OK');
+}
+
+function continuar() {
+  var d = SIAC.datos();
+  if (!d.cuentaDestino) {
+    SIAC.mensaje('msg', 'Debe seleccionar una cuenta destino.', 'error');
+    SIAC.registrar('Transferir en Cuenta Existente', 'Continuar sin cuenta destino', 'ERROR: Debe seleccionar una cuenta destino');
+    return;
+  }
+  SIAC.ir('CambioTitularidad_DatosIdentificacionPersonal.html', 'Datos de Identificación Personal');
+}
+</script>
+</body>
+</html>

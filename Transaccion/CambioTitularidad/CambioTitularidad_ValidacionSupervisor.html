@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cambio de Titularidad - Validación Jefe/Supervisor</title>
+<link rel="stylesheet" href="assets_css_styles.css">
+</head>
+<body>
+<div id="hdr"></div>
+<div id="ruta" class="ruta"></div>
+<div class="wrap">
+  <div class="col-cliente" id="ficha"></div>
+  <div class="col-main">
+    <div id="msgGlobal" class="oculto"></div>
+    <div class="panel">
+      <div class="panel-header">3.2.10 a 3.2.12 VALIDACIÓN DE JEFE/SUPERVISOR</div>
+      <div class="panel-body">
+        <div class="escenario">
+          Credenciales de práctica: usuario <b>supervisor01</b> / clave <b>Super123!</b> &mdash; <b>DATO SIMULADO PARA ENTRENAMIENTO</b>.
+        </div>
+        <div id="msg" class="oculto"></div>
+        <p>Se mostrará el pop-up para ingresar usuario y clave del Jefe/Supervisor.</p>
+        <div class="botonera">
+          <button type="button" class="btn" onclick="abrirPopup()">Mostrar pop-up de validación</button>
+        </div>
+      </div>
+      <div class="botonera" style="border-top:1px solid #eee">
+        <button type="button" class="btn btn-claro" onclick="SIAC.ir('CambioTitularidad_ValidacionPin.html','Validación de PIN')">Volver</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="footer-nota">ENTORNO DE ENTRENAMIENTO · Datos ficticios</div>
+
+<script src="assets_js_app.js"></script>
+<script>
+SIAC.initPantalla({ nombre: 'Validación de Jefe/Supervisor', paso: '3.2.10 a 3.2.12', menu: 'cuenta', linea: SIAC.CLIENTE.linea });
+SIAC.fichaCliente('ficha');
+
+function abrirPopup() {
+  var back = document.createElement('div');
+  back.className = 'modal-back';
+  back.innerHTML =
+    '<div class="modal-box"><div class="modal-head">Validación de Jefe/Supervisor (SIMULADO)</div>' +
+    '<div class="modal-body">' +
+    '<div id="msgPop" class="oculto"></div>' +
+    '<div class="form-row"><div class="form-group" style="flex:1 1 100%"><label>Usuario:</label><input type="text" id="supU" maxlength="20"></div></div>' +
+    '<div class="form-row"><div class="form-group" style="flex:1 1 100%"><label>Clave:</label><input type="password" id="supC" maxlength="20"></div></div>' +
+    '</div>' +
+    '<div class="modal-foot"><button type="button" class="btn" id="bAcep">Aceptar</button> ' +
+    '<button type="button" class="btn btn-claro" id="bCanc">Cancelar</button></div></div>';
+  document.body.appendChild(back);
+  back.querySelector('#bCanc').onclick = function () { document.body.removeChild(back); };
+  back.querySelector('#bAcep').onclick = function () {
+    var u = back.querySelector('#supU').value.trim(), c = back.querySelector('#supC').value;
+    var m = back.querySelector('#msgPop');
+    if (!u || !c) {
+      m.className = 'msg msg-error'; m.textContent = 'Debe ingresar usuario y clave del Jefe/Supervisor.';
+      SIAC.registrar('Validación de Jefe/Supervisor', 'Aceptar sin credenciales', 'ERROR: Debe ingresar usuario y clave');
+      return;
+    }
+    if (u !== SIAC.SUP_USUARIO || c !== SIAC.SUP_CLAVE) {
+      m.className = 'msg msg-error';
+      m.innerHTML = 'Usuario o clave de Jefe/Supervisor incorrectos. <span class="badge badge-sim">VALIDACIÓN SIMULADA</span>';
+      SIAC.registrar('Validación de Jefe/Supervisor', 'Credenciales incorrectas', 'ERROR: Usuario o clave de supervisor incorrectos');
+      back.querySelector('#supC').value = '';
+      return;
+    }
+    document.body.removeChild(back);
+    SIAC.guardarDatos({ validacionSupervisor: true });
+    SIAC.registrar('Validación de Jefe/Supervisor', 'Validación correcta', 'OK: Puede continuar con la transacción');
+    SIAC.alerta('Puede continuar con la transacción.', 'Alerta del sistema (SIMULADO)', function () {
+      SIAC.ir('CambioTitularidad_LineasCuentaOrigen.html', 'Líneas de la Cuenta Origen');
+    });
+  };
+}
+abrirPopup();
+</script>
+</body>
+</html>

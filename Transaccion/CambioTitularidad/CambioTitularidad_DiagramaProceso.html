@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cambio de Titularidad - Diagrama del Proceso</title>
+<link rel="stylesheet" href="assets_css_styles.css">
+</head>
+<body>
+<div id="hdr"></div>
+<div id="ruta" class="ruta"></div>
+<div class="wrap">
+  <div class="col-main">
+    <div id="msgGlobal" class="oculto"></div>
+    <div class="panel">
+      <div class="panel-header">3.2 DIAGRAMA DEL PROCESO DE NEGOCIO, VALIDACIÓN PIN</div>
+      <div class="panel-body">
+        <div class="escenario">Representación funcional del diagrama descrito en el MDU (no se reproducen imágenes del documento).</div>
+        <div class="diagrama">
+          <div class="dg-paso">Ingreso al aplicativo SIACUNICO</div><div class="dg-flecha">&#8595;</div>
+          <div class="dg-paso">Buscar cliente por N° de línea</div><div class="dg-flecha">&#8595;</div>
+          <div class="dg-paso">Transacciones por Cuenta &gt; Cambio de Titularidad</div><div class="dg-flecha">&#8595;</div>
+          <div class="dg-paso">Registrar Motivo y Solicitante</div><div class="dg-flecha">&#8595;</div>
+          <div class="dg-paso dg-dec">¿El perfil del usuario requiere validación de PIN?</div>
+          <div class="dg-flecha">&#8595; NO: "Su perfil no necesita esta validación" &nbsp;&nbsp;|&nbsp;&nbsp; SÍ: Enviar PIN</div>
+          <div class="dg-paso">Enviar PIN &rarr; Validar PIN enviado por SMS</div><div class="dg-flecha">&#8595;</div>
+          <div class="dg-paso dg-dec">¿PIN conforme?</div>
+          <div class="dg-flecha">&#8595; NO (2° intento): "¿No recibió PIN?" &rarr; Validación de Jefe/Supervisor</div>
+          <div class="dg-paso">Secciones del Cambio de Titularidad habilitadas</div><div class="dg-flecha">&#8595;</div>
+          <div class="dg-paso">Seleccionar líneas de la cuenta origen</div><div class="dg-flecha">&#8595;</div>
+          <div class="dg-paso dg-dec">¿Transferir a cuenta existente o Crear Cuenta?</div><div class="dg-flecha">&#8595;</div>
+          <div class="dg-paso">Datos de Identificación Personal / Contacto / Dirección de Facturación</div><div class="dg-flecha">&#8595;</div>
+          <div class="dg-paso">Guardar &rarr; ¿Está seguro de grabar? &rarr; Aceptar</div><div class="dg-flecha">&#8595;</div>
+          <div class="dg-paso dg-fin">Mensaje de éxito &rarr; Constancia</div>
+        </div>
+      </div>
+      <div class="botonera">
+        <button type="button" class="btn btn-claro" onclick="SIAC.ir('CambioTitularidad_AccesoSistema.html','Acceso al Sistema')">Volver</button>
+        <button type="button" class="btn" onclick="SIAC.ir('CambioTitularidad_BusquedaCliente.html','Búsqueda de Cliente')">Continuar</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="footer-nota">ENTORNO DE ENTRENAMIENTO · Datos ficticios</div>
+
+<script src="assets_js_app.js"></script>
+<script>
+SIAC.initPantalla({ nombre: 'Diagrama del Proceso', paso: '3.2' });
+</script>
+</body>
+</html>

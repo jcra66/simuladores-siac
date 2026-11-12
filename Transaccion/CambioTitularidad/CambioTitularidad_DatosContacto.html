@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cambio de Titularidad - Datos de Contacto</title>
+<link rel="stylesheet" href="assets_css_styles.css">
+</head>
+<body>
+<div id="hdr"></div>
+<div id="ruta" class="ruta"></div>
+<div class="wrap">
+  <div class="col-cliente" id="ficha"></div>
+  <div class="col-main">
+    <div id="msgGlobal" class="oculto"></div>
+    <div class="panel">
+      <div class="panel-header"><span class="icono">&#128100;</span>Datos de Contacto (3.2.19)</div>
+      <div class="panel-body">
+        <div id="msg" class="oculto"></div>
+        <div class="subpanel">
+          <div class="form-row">
+            <div class="form-group"><label>Telefono 1:</label><input type="text" id="tel1" maxlength="9" value="9955555"></div>
+            <div class="form-group"><label>Telefono 2:</label><input type="text" id="tel2" maxlength="9" value="95654411"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Email:</label><input type="text" id="mail1" maxlength="60" value="john@correo-simulado.com"></div>
+            <div class="form-group"><label>Confirmar Email<span class="obligatorio">(*)</span></label><input type="text" id="mail2" maxlength="60" value="john@correo-simulado.com"></div>
+          </div>
+        </div>
+
+        <a class="enlace-seccion">Dirección de Domicilio</a>
+        <div class="subpanel">
+          <div class="form-row">
+            <div class="form-group"><label>Calle/Av./Jr.<span class="obligatorio">(*)</span></label>
+              <select id="tipoCalle"><option value="">Seleccionar</option><option value="CA">CA - Calle</option><option value="AV">AV - Avenida</option><option value="JR">JR - Jiron</option><option value="PS">PS - Pasaje</option></select></div>
+            <div class="form-group"><label>Nombre Calle/Av./Jr.<span class="obligatorio">(*)</span></label><input type="text" id="nomCalle" maxlength="40"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Número<span class="obligatorio">(*)</span></label><input type="text" id="numero" maxlength="6"></div>
+            <div class="form-group"><label>S/N:</label><input type="checkbox" id="sn" onchange="toggleSN()" style="width:auto"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Mz/Bloque/Edif:</label>
+              <select id="mz"><option value="">Seleccionar</option><option selected>MZ - Manzana</option><option>BL - Bloque</option><option>ED - Edificio</option></select></div>
+            <div class="form-group"><label>Nro Mz/Bloque/Edif:</label><input type="text" id="nroMz" maxlength="6"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Tipo Dpt/Int:</label>
+              <select id="tipoDpt"><option value="">Seleccionar</option><option>DP - Departamento</option><option>IN - Interior</option></select></div>
+            <div class="form-group"><label>Número Dpto/Int:</label><input type="text" id="nroDpt" maxlength="6"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Urb/Res/Pje:</label>
+              <select id="urb"><option value="">Seleccionar</option><option>URB - Urbanización</option><option>RES - Residencial</option></select></div>
+            <div class="form-group"><label>Nombre Urb/Res/Pje:</label><input type="text" id="nomUrb" maxlength="40"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Zona/Etapa:</label>
+              <select id="zona"><option value="">Seleccionar</option><option>ZN - Zona</option><option>ET - Etapa</option></select></div>
+            <div class="form-group"><label>Nombre Zona/Etapa:</label><input type="text" id="nomZona" maxlength="40"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Referencias<span class="obligatorio">(*)</span></label><input type="text" id="referencia" maxlength="40" placeholder="Máx. 40"></div>
+            <div class="form-group" style="flex:0 0 200px"><label>(Máx.40):</label><input type="text" id="cntRef" value="0" readonly style="width:60px"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>País:</label><select id="pais"><option selected>Peru</option></select></div>
+            <div class="form-group"><label>Departamento<span class="obligatorio">(*)</span></label>
+              <select id="dep" onchange="cargarProv()"><option value="">Seleccionar</option><option>LIMA</option><option>AREQUIPA</option><option>LA LIBERTAD</option></select></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Provincia<span class="obligatorio">(*)</span></label><select id="prov" onchange="cargarDist()"><option value="">Seleccionar</option></select></div>
+            <div class="form-group"><label>Distrito<span class="obligatorio">(*)</span></label><select id="dist"><option value="">Seleccionar</option></select></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Cod Postal:</label><input type="text" id="cp" maxlength="5"></div>
+          </div>
+          <span class="nota-obligatorio">(*) Campos Obligatorios</span>
+        </div>
+      </div>
+      <div class="botonera" style="border-top:1px solid #eee">
+        <button type="button" class="btn btn-claro" onclick="SIAC.ir('CambioTitularidad_DatosIdentificacionPersonal.html','Datos de Identificación Personal')">Volver</button>
+        <button type="button" class="btn" onclick="continuar()">Dirección De Facturación</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="footer-nota">ENTORNO DE ENTRENAMIENTO · Datos ficticios</div>
+
+<script src="assets_js_app.js"></script>
+<script>
+SIAC.initPantalla({ nombre: 'Datos de Contacto', paso: '3.2.19', menu: 'cuenta', linea: SIAC.CLIENTE.linea });
+SIAC.fichaCliente('ficha');
+
+var PROV = { 'LIMA': ['LIMA', 'HUAURA', 'CAÑETE'], 'AREQUIPA': ['AREQUIPA', 'CAMANA'], 'LA LIBERTAD': ['TRUJILLO', 'ASCOPE'] };
+var DIST = {
+  'LIMA': ['SAN JUAN DE MIRAFLORES', 'MIRAFLORES', 'SURCO', 'LA VICTORIA'],
+  'HUAURA': ['HUACHO', 'HUALMAY'], 'CAÑETE': ['SAN VICENTE'], 'AREQUIPA': ['CERRO COLORADO', 'YANAHUARA'],
+  'CAMANA': ['CAMANA'], 'TRUJILLO': ['TRUJILLO', 'VICTOR LARCO'], 'ASCOPE': ['CHICAMA']
+};
+function cargarProv() {
+  var d = document.getElementById('dep').value, s = document.getElementById('prov');
+  s.innerHTML = '<option value="">Seleccionar</option>' + (PROV[d] || []).map(function (p) { return '<option>' + p + '</option>'; }).join('');
+  document.getElementById('dist').innerHTML = '<option value="">Seleccionar</option>';
+}
+function cargarDist() {
+  var p = document.getElementById('prov').value, s = document.getElementById('dist');
+  s.innerHTML = '<option value="">Seleccionar</option>' + (DIST[p] || []).map(function (x) { return '<option>' + x + '</option>'; }).join('');
+}
+function toggleSN() {
+  var sn = document.getElementById('sn').checked;
+  document.getElementById('numero').disabled = sn;
+  if (sn) document.getElementById('numero').value = '';
+}
+document.getElementById('referencia').addEventListener('input', function () {
+  document.getElementById('cntRef').value = this.value.length;
+});
+
+function err(texto, detalle) {
+  SIAC.mensaje('msg', texto, 'error');
+  SIAC.registrar('Datos de Contacto', detalle, 'ERROR: ' + texto.replace(/<[^>]+>/g, ''));
+  return false;
+}
+
+function continuar() {
+  var m1 = document.getElementById('mail1').value.trim(), m2 = document.getElementById('mail2').value.trim();
+  if (m1 !== m2) return err('El Email y Confirmar Email deben coincidir. <span class="badge badge-sim">VALIDACIÓN SIMULADA</span>', 'Email no coincide');
+  if (!document.getElementById('tipoCalle').value) return err('Debe ingresar tipo de calle.', 'Sin tipo de calle');
+  if (!document.getElementById('nomCalle').value.trim()) return err('Debe ingresar el nombre de la calle.', 'Sin nombre de calle');
+  if (!document.getElementById('sn').checked && !document.getElementById('numero').value.trim())
+    return err('Debe ingresar el número de domicilio o marcar S/N.', 'Sin número de domicilio');
+  if (!document.getElementById('referencia').value.trim()) return err('Debe ingresar una referencia de domicilio.', 'Sin referencia');
+  if (!document.getElementById('dep').value) return err('Debe seleccionar departamento domicilio.', 'Sin departamento');
+  if (!document.getElementById('prov').value) return err('Debe seleccionar provincia domicilio.', 'Sin provincia');
+  if (!document.getElementById('dist').value) return err('Debe seleccionar un distrito domicilio.', 'Sin distrito');
+
+  var dom = {
+    tipoCalle: document.getElementById('tipoCalle').options[document.getElementById('tipoCalle').selectedIndex].text,
+    nomCalle: document.getElementById('nomCalle').value, numero: document.getElementById('numero').value,
+    sn: document.getElementById('sn').checked, mz: document.getElementById('mz').value, nroMz: document.getElementById('nroMz').value,
+    tipoDpt: document.getElementById('tipoDpt').value, nroDpt: document.getElementById('nroDpt').value,
+    urb: document.getElementById('urb').value, nomUrb: document.getElementById('nomUrb').value,
+    zona: document.getElementById('zona').value, nomZona: document.getElementById('nomZona').value,
+    referencia: document.getElementById('referencia').value, pais: 'Peru',
+    dep: document.getElementById('dep').value, prov: document.getElementById('prov').value,
+    dist: document.getElementById('dist').value, cp: document.getElementById('cp').value
+  };
+  SIAC.guardarDatos({
+    contacto: { tel1: document.getElementById('tel1').value, tel2: document.getElementById('tel2').value, email: m1 },
+    domicilio: dom
+  });
+  SIAC.registrar('Datos de Contacto', 'Registra contacto y dirección de domicilio', 'OK');
+  SIAC.ir('CambioTitularidad_DireccionFacturacion.html', 'Dirección de Facturación');
+}
+</script>
+</body>
+</html>

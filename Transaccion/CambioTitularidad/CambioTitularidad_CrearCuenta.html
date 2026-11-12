@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cambio de Titularidad - Crear Cuenta</title>
+<link rel="stylesheet" href="assets_css_styles.css">
+</head>
+<body>
+<div id="hdr"></div>
+<div id="ruta" class="ruta"></div>
+<div class="wrap">
+  <div class="col-cliente" id="ficha"></div>
+  <div class="col-main">
+    <div id="msgGlobal" class="oculto"></div>
+    <div class="panel">
+      <div class="panel-header">3.2.17 CREAR CUENTA &mdash; NUEVO TITULAR</div>
+      <div class="panel-body">
+        <div class="escenario">Se presiona <b>Crear Cuenta</b> cuando el cliente no tiene alguna cuenta existente. Ingrese los datos del nuevo titular (DATOS SIMULADOS).</div>
+        <div id="msg" class="oculto"></div>
+        <div class="subpanel">
+          <div class="form-row">
+            <div class="form-group"><label>Tipo Documento <span class="obligatorio">(*)</span></label>
+              <select id="tipoDoc"><option value="">Seleccionar</option><option selected>DNI</option><option>CE</option><option>PASAPORTE</option><option>RUC</option></select></div>
+            <div class="form-group"><label>N° Documento <span class="obligatorio">(*)</span></label><input type="text" id="nroDoc" maxlength="12" placeholder="Ej. 47328440"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Nombre <span class="obligatorio">(*)</span></label><input type="text" id="nombre" maxlength="40"></div>
+            <div class="form-group"><label>Apellidos <span class="obligatorio">(*)</span></label><input type="text" id="apellidos" maxlength="40"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Fecha Nacimiento <span class="obligatorio">(*)</span></label><input type="date" id="fecNac"></div>
+            <div class="form-group"><label>Nacionalidad:</label>
+              <select id="nacionalidad"><option selected>Peru</option><option>Venezuela</option><option>Colombia</option><option>Otro</option></select></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Estado Civil:</label>
+              <select id="estadoCivil"><option selected>Soltero (a)</option><option>Casado (a)</option><option>Viudo (a)</option><option>Divorciado (a)</option></select></div>
+            <div class="form-group"><label>Sexo:</label>
+              <span><label class="chk-inline"><input type="radio" name="sexo" value="Hombre" checked> Hombre</label>
+              <label class="chk-inline"><input type="radio" name="sexo" value="Mujer"> Mujer</label>
+              <label class="chk-inline"><input type="radio" name="sexo" value="NA"> NA</label></span></div>
+          </div>
+          <span class="nota-obligatorio">(*) Campos Obligatorios</span>
+        </div>
+      </div>
+      <div class="botonera" style="border-top:1px solid #eee">
+        <button type="button" class="btn btn-claro" onclick="SIAC.ir('CambioTitularidad_LineasCuentaOrigen.html','Líneas de la Cuenta Origen')">Volver</button>
+        <button type="button" class="btn" onclick="continuar()">Continuar</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="footer-nota">ENTORNO DE ENTRENAMIENTO · Datos ficticios</div>
+
+<script src="assets_js_app.js"></script>
+<script>
+SIAC.initPantalla({ nombre: 'Crear Cuenta', paso: '3.2.17', menu: 'cuenta', linea: SIAC.CLIENTE.linea });
+SIAC.fichaCliente('ficha');
+
+function continuar() {
+  var td = document.getElementById('tipoDoc').value,
+      nd = document.getElementById('nroDoc').value.trim(),
+      no = document.getElementById('nombre').value.trim(),
+      ap = document.getElementById('apellidos').value.trim(),
+      fn = document.getElementById('fecNac').value;
+  if (!td) { return error('Debe seleccionar tipo de documento del nuevo titular.', 'tipo de documento'); }
+  if (!nd) { return error('Debe ingresar numero de documento del nuevo titular.', 'número de documento'); }
+  if (td === 'DNI' && !/^[0-9]{8}$/.test(nd)) { return error('El DNI debe tener 8 dígitos numéricos. <span class="badge badge-sim">VALIDACIÓN SIMULADA</span>', 'formato de documento'); }
+  if (!no) { return error('Debe ingresar nombre del nuevo titular.', 'nombre'); }
+  if (!ap) { return error('Debe ingresar apellidos del nuevo titular.', 'apellidos'); }
+  if (!fn) { return error('Debe seleccionar fecha nacimiento del nuevo titular.', 'fecha de nacimiento'); }
+
+  SIAC.guardarDatos({
+    nuevoTitular: {
+      tipoDoc: td, nroDoc: nd, nombre: no, apellidos: ap, fecNac: fn,
+      nacionalidad: document.getElementById('nacionalidad').value,
+      estadoCivil: document.getElementById('estadoCivil').value,
+      sexo: document.querySelector('input[name=sexo]:checked').value
+    },
+    cuentaDestino: { cta: 'CUENTA NUEVA (SIMULADA)', tit: no + ' ' + ap, tipo: 'Consumer', est: 'Por crear' }
+  });
+  SIAC.registrar('Crear Cuenta', 'Registra nuevo titular ' + no + ' ' + ap, 'OK');
+  SIAC.ir('CambioTitularidad_DatosIdentificacionPersonal.html', 'Datos de Identificación Personal');
+}
+
+function error(msg, campo) {
+  SIAC.mensaje('msg', msg, 'error');
+  SIAC.registrar('Crear Cuenta', 'Continuar sin ' + campo, 'ERROR: ' + msg.replace(/<[^>]+>/g, ''));
+  return false;
+}
+</script>
+</body>
+</html>
