@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SIAC UNICO - Datos de Identificacion Personal</title>
+<link rel="stylesheet" href="./assets_css_styles.css">
+</head>
+<body>
+<div id="top"></div>
+
+<div class="contenedor">
+  <div class="col-ficha" id="ficha"></div>
+
+  <div class="col-main">
+
+    <div class="msg info">
+      3.2.18 Ingresamos los datos modificables en Datos de Identificacion Personal.
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">Datos de Identificacion Personal</div>
+      <div class="panel-body">
+
+        <div class="form-row">
+          <div class="form-col">
+            <label>Tipo Documento:</label>
+            <div class="campo">
+              <select id="tipoDoc">
+                <option>DNI</option>
+                <option>CE</option>
+                <option>RUC</option>
+                <option>PASAPORTE</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-col">
+            <label>Nro. Documento:</label>
+            <div class="campo"><input type="text" id="nroDoc" value="47328440"></div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-col">
+            <label>Nombre:</label>
+            <div class="campo"><input type="text" id="nombre" value="JUAN CARLOS"></div>
+          </div>
+          <div class="form-col">
+            <label>Apellidos:</label>
+            <div class="campo"><input type="text" id="apellidos" value="PEREZ SIMULADO"></div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-col">
+            <label>Fecha Nacimiento<span class="obligatorio">(*)</span>:</label>
+            <div class="campo"><input type="text" id="fechaNac" value="09/08/1969" style="text-align:left;"></div>
+          </div>
+          <div class="form-col">
+            <label>Nacionalidad:</label>
+            <div class="campo">
+              <select id="nacionalidad">
+                <option>Peru</option>
+                <option>Argentina</option>
+                <option>Chile</option>
+                <option>Colombia</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-col">
+            <label>Estado Civil:</label>
+            <div class="campo">
+              <select id="estadoCivil">
+                <option>Soltero (a)</option>
+                <option>Casado (a)</option>
+                <option>Divorciado (a)</option>
+                <option>Viudo (a)</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-col">
+            <label>Sexo:</label>
+            <div class="campo">
+              <label style="width:auto;font-weight:normal;margin-right:16px;">
+                <input type="radio" name="sexo" value="Hombre" checked style="width:auto;"> Hombre
+              </label>
+              <label style="width:auto;font-weight:normal;margin-right:16px;">
+                <input type="radio" name="sexo" value="Mujer" style="width:auto;"> Mujer
+              </label>
+              <label style="width:auto;font-weight:normal;">
+                <input type="radio" name="sexo" value="NA" style="width:auto;"> NA
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="nota-oblig">(*) Campos Obligatorios
+          <span class="simulado">DATOS SIMULADOS PARA ENTRENAMIENTO</span>
+        </div>
+
+        <div id="msg"></div>
+
+        <div class="botonera">
+          <button class="btn" id="btnContinuar">Continuar a Datos de Contacto</button>
+          <a class="btn secundario" href="./CambioTitularidad_CrearCuenta.html">Volver</a>
+          <button class="btn rojo ico ico-home" id="btnCerrar">Cerrar</button>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="./assets_js_app.js"></script>
+<script>
+  SIAC.layout({
+    titulo: "Cambio de Titularidad",
+    paso: "Datos Nuevo Titular",
+    ficha: true,
+    registrar: "Datos de Identificacion Personal"
+  });
+
+  SIAC.porId("btnContinuar").onclick = function () {
+    var nro = SIAC.porId("nroDoc").value.trim();
+    var nom = SIAC.porId("nombre").value.trim();
+    var ape = SIAC.porId("apellidos").value.trim();
+    var fec = SIAC.porId("fechaNac").value.trim();
+
+    if (!nro || !nom || !ape) {
+      SIAC.mensaje("msg", "err", "Debe ingresar tipo y numero de documento, nombre y apellidos del nuevo titular.");
+      SIAC.registrarError("Datos de Identificacion Personal", "Datos del nuevo titular incompletos", "Validacion");
+      return;
+    }
+    if (!fec) {
+      SIAC.mensaje("msg", "err", "Fecha Nacimiento(*) es un campo obligatorio.");
+      SIAC.registrarError("Datos de Identificacion Personal", "Fecha de nacimiento vacia", "Validacion");
+      return;
+    }
+
+    SIAC.guardarDato("nvoTipoDoc", SIAC.porId("tipoDoc").value);
+    SIAC.guardarDato("nvoNroDoc", nro);
+    SIAC.guardarDato("nvoNombre", nom);
+    SIAC.guardarDato("nvoApellidos", ape);
+    SIAC.guardarDato("nvoFechaNac", fec);
+    SIAC.guardarDato("nvoNacionalidad", SIAC.porId("nacionalidad").value);
+    SIAC.guardarDato("nvoEstadoCivil", SIAC.porId("estadoCivil").value);
+    SIAC.guardarDato("nvoSexo", document.querySelector("input[name=sexo]:checked").value);
+
+    SIAC.registrarPaso("Datos de Identificacion Personal", "Registra datos del nuevo titular");
+    window.location.href = "./CambioTitularidad_DatosContacto.html";
+  };
+
+  SIAC.porId("btnCerrar").onclick = function () {
+    SIAC.registrarPaso("Datos de Identificacion Personal", "Cierra la pagina");
+    window.location.href = "./CambioTitularidad_CambioTitularidad.html";
+  };
+</script>
+</body>
+</html>

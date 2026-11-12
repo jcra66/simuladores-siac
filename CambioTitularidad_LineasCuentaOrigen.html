@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SIAC UNICO - Lineas de la Cuenta Origen</title>
+<link rel="stylesheet" href="./assets_css_styles.css">
+</head>
+<body>
+<div id="top"></div>
+
+<div class="contenedor">
+  <div class="col-ficha" id="ficha"></div>
+
+  <div class="col-main">
+
+    <div class="msg info">
+      3.2.13 Se muestran todas las secciones para continuar con el proceso de cambio de titularidad.
+      3.2.14 Se muestran los datos del numero consultado. 3.2.15 Seleccionamos una o varias lineas a transferir.
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">Lineas de la Cuenta Origen</div>
+      <div class="panel-body">
+        <table class="grilla" id="grilla">
+          <thead>
+            <tr>
+              <th style="width:60px;"><input type="checkbox" id="chkAll" style="width:auto;"></th>
+              <th>PLAN</th>
+              <th>LINEA</th>
+              <th>REINTEGRO</th>
+            </tr>
+          </thead>
+          <tbody id="cuerpo"></tbody>
+        </table>
+        <div class="total-reintegro">
+          Total reintegro Con IGV(S/): <span id="total">0.00</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-body">
+        <div class="form-row">
+          <div class="form-col">
+            <div class="campo">
+              <button class="btn" id="btnEvaluacion">Evaluacion</button>
+            </div>
+          </div>
+          <div class="form-col">
+            <label>Sec:</label>
+            <div class="campo"><input type="text" id="sec" readonly value=""></div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-col">
+            <div class="campo">
+              <button class="btn secundario" id="btnCrearCuenta">Crear Cuenta</button>
+            </div>
+          </div>
+          <div class="form-col">
+            <div class="campo">
+              <button class="btn secundario" id="btnTransferir">Transferir en Cuenta Existente</button>
+            </div>
+          </div>
+        </div>
+        <div class="nota-oblig">
+          Evaluacion redirecciona a SISACT para la evaluacion crediticia del nuevo titular.
+          Los botones Crear Cuenta y Transferir en Cuenta Existente se habilitan luego de la evaluacion.
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-body">
+        <div class="form-row">
+          <div class="form-col">
+            <label>Fecha de Programacion:</label>
+            <div class="campo"><input type="text" id="fechaProg" value="11/11/2026" style="text-align:left;"></div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-col">
+            <label>Envio por E-mail:</label>
+            <div class="campo">
+              <input type="checkbox" id="chkMail" checked style="width:auto;">
+              <input type="text" id="mail" style="text-align:left;">
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-col">
+            <label>Punto de Atencion:</label>
+            <div class="campo">
+              <select id="pto">
+                <option>Seleccionar</option>
+                <option>CAC ANGAMOS 123</option>
+                <option>CAC LA MOLINA</option>
+                <option>CAC MIRAFLORES</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-col" style="flex:1 1 100%;">
+            <label>Notas:</label>
+            <div class="campo"><textarea id="notas" placeholder="Agregar Notas"></textarea></div>
+          </div>
+        </div>
+
+        <div id="msg"></div>
+
+        <div class="botonera">
+          <button class="btn secundario ico ico-save" id="btnGuardar">Guardar</button>
+          <button class="btn rojo ico ico-home" id="btnCerrar">Cerrar</button>
+          <button class="btn secundario ico ico-doc" id="btnConstancia">Constancia</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="./assets_js_app.js"></script>
+<script>
+  SIAC.layout({
+    titulo: "Cambio de Titularidad",
+    paso: "Lineas Cuenta Origen",
+    ficha: true,
+    registrar: "Lineas de la Cuenta Origen"
+  });
+
+  SIAC.porId("mail").value = SIAC.DATOS.email;
+
+  var cuerpo = SIAC.porId("cuerpo");
+  SIAC.DATOS.lineas.forEach(function (l, i) {
+    var tr = SIAC.el("tr");
+    var td0 = SIAC.el("td");
+    var chk = SIAC.el("input");
+    chk.type = "checkbox";
+    chk.className = "chkLinea";
+    chk.style.width = "auto";
+    chk.setAttribute("data-reintegro", l.reintegro);
+    chk.setAttribute("data-linea", l.linea);
+    chk.onclick = recalcular;
+    td0.appendChild(chk);
+    tr.appendChild(td0);
+    tr.appendChild(SIAC.el("td", null, l.plan));
+    tr.appendChild(SIAC.el("td", null, l.linea));
+    tr.appendChild(SIAC.el("td", null, l.reintegro));
+    cuerpo.appendChild(tr);
+  });
+
+  function seleccionadas() {
+    var out = [];
+    var chks = document.getElementsByClassName("chkLinea");
+    for (var i = 0; i < chks.length; i++) {
+      if (chks[i].checked) {
+        out.push({
+          linea: chks[i].getAttribute("data-linea"),
+          reintegro: parseFloat(chks[i].getAttribute("data-reintegro"))
+        });
+      }
+    }
+    return out;
+  }
+
+  function recalcular() {
+    var sel = seleccionadas();
+    var t = 0;
+    sel.forEach(function (s) { t += s.reintegro; });
+    SIAC.porId("total").innerHTML = "";
+    SIAC.porId("total").appendChild(document.createTextNode(t.toFixed(2)));
+    var chks = document.getElementsByClassName("chkLinea");
+    for (var i = 0; i < chks.length; i++) {
+      chks[i].parentNode.parentNode.className = chks[i].checked ? "sel" : "";
+    }
+    SIAC.guardarDato("lineasSeleccionadas", sel.map(function (s) { return s.linea; }));
+    SIAC.guardarDato("totalReintegro", t.toFixed(2));
+  }
+
+  SIAC.porId("chkAll").onclick = function () {
+    var v = this.checked;
+    var chks = document.getElementsByClassName("chkLinea");
+    for (var i = 0; i < chks.length; i++) { chks[i].checked = v; }
+    recalcular();
+  };
+
+  function validaLineas() {
+    if (seleccionadas().length === 0) {
+      SIAC.modal("Alerta", "Seleccione Lineas Disponibles");
+      SIAC.mensaje("msg", "err", "Seleccione Lineas Disponibles");
+      SIAC.registrarError("Lineas de la Cuenta Origen", "No selecciono al menos una linea", "Validacion");
+      return false;
+    }
+    return true;
+  }
+
+  SIAC.porId("btnEvaluacion").onclick = function () {
+    if (!validaLineas()) { return; }
+    SIAC.porId("sec").value = "7180613 - APROBADO";
+    SIAC.guardarDato("sec", "7180613 - APROBADO");
+    SIAC.registrarPaso("Lineas de la Cuenta Origen", "Evaluacion crediticia en SISACT: APROBADO");
+    SIAC.mensaje("msg", "ok", "Evaluacion crediticia APROBADA en SISACT (Sec: 7180613) - SIMULADO.");
+  };
+
+  SIAC.porId("btnTransferir").onclick = function () {
+    if (!validaLineas()) { return; }
+    SIAC.registrarPaso("Lineas de la Cuenta Origen", "Presiona Transferir en Cuenta Existente");
+    window.location.href = "./CambioTitularidad_TransferirCuentaExistente.html";
+  };
+
+  SIAC.porId("btnCrearCuenta").onclick = function () {
+    if (!validaLineas()) { return; }
+    if (!SIAC.porId("sec").value) {
+      SIAC.mensaje("msg", "warn",
+        "Debe ejecutar la Evaluacion crediticia (SISACT) antes de crear la cuenta del nuevo titular.");
+      SIAC.registrarError("Lineas de la Cuenta Origen", "Crear Cuenta sin evaluacion crediticia", "Regla de negocio");
+      return;
+    }
+    SIAC.registrarPaso("Lineas de la Cuenta Origen", "Presiona Crear Cuenta");
+    window.location.href = "./CambioTitularidad_CrearCuenta.html";
+  };
+
+  SIAC.porId("btnGuardar").onclick = function () {
+    if (!validaLineas()) { return; }
+    SIAC.guardarDato("fechaProg", SIAC.porId("fechaProg").value);
+    SIAC.guardarDato("puntoAtencion", SIAC.porId("pto").value);
+    SIAC.guardarDato("notas", SIAC.porId("notas").value);
+    SIAC.guardarDato("envioMail", SIAC.porId("chkMail").checked ? SIAC.porId("mail").value : "");
+    SIAC.registrarPaso("Lineas de la Cuenta Origen", "Presiona Guardar");
+    window.location.href = "./CambioTitularidad_ConfirmacionOperacion.html";
+  };
+
+  SIAC.porId("btnCerrar").onclick = function () {
+    SIAC.registrarPaso("Lineas de la Cuenta Origen", "Cierra la pagina");
+    window.location.href = "./CambioTitularidad_CambioTitularidad.html";
+  };
+
+  SIAC.porId("btnConstancia").onclick = function () {
+    SIAC.registrarPaso("Lineas de la Cuenta Origen", "Presiona Constancia");
+    window.location.href = "./CambioTitularidad_Constancia.html";
+  };
+</script>
+</body>
+</html>

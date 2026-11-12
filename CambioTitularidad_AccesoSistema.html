@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SIAC UNICO - Acceso al Sistema</title>
+<link rel="stylesheet" href="./assets_css_styles.css">
+</head>
+<body>
+<div id="top"></div>
+
+<div class="contenedor">
+  <div class="col-main">
+
+    <div class="panel">
+      <div class="panel-head">3.2.1 Ingresar al Aplicativo del SIACUNICO</div>
+      <div class="panel-body">
+
+        <div class="msg info">
+          Se utiliza el Menu Principal de la Aplicacion para acceder a las distintas
+          opciones que tiene este nuevo sistema.
+        </div>
+
+        <div class="subpanel" style="max-width:420px;margin:0 auto;">
+          <div class="form-row">
+            <div class="form-col" style="flex:1 1 100%;">
+              <label>Usuario:</label>
+              <div class="campo"><input type="text" id="usr" value="C12640" ></div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-col" style="flex:1 1 100%;">
+              <label>Password:</label>
+              <div class="campo"><input type="password" id="pwd" value="1234"></div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-col" style="flex:1 1 100%;">
+              <label>Punto de Atencion:</label>
+              <div class="campo">
+                <select id="pto">
+                  <option>CAC ANGAMOS 123</option>
+                  <option>CAC LA MOLINA</option>
+                  <option>CAC MIRAFLORES</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div id="msg"></div>
+          <div class="botonera">
+            <button class="btn" id="btnIngresar">Ingresar</button>
+            <a class="btn secundario" href="./index.html">Volver al Portal</a>
+          </div>
+          <div class="nota-oblig">
+            Usuario y clave simulados para entrenamiento (C12640 / 1234).
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="./assets_js_app.js"></script>
+<script>
+  SIAC.layout({ titulo: "ACCESO AL SISTEMA SIAC UNICO", registrar: "Acceso al Sistema" });
+
+  SIAC.porId("btnIngresar").onclick = function () {
+    var u = SIAC.porId("usr").value;
+    var p = SIAC.porId("pwd").value;
+    if (!u || !p) {
+      SIAC.mensaje("msg", "err", "Debe ingresar usuario y password.");
+      SIAC.registrarError("Acceso al Sistema", "Ingreso sin usuario o password", "Validacion");
+      return;
+    }
+    SIAC.registrarPaso("Acceso al Sistema", "Ingreso al aplicativo SIACUNICO");
+    window.location.href = "./CambioTitularidad_DiagramaProceso.html";
+  };
+</script>
+</body>
+</html>

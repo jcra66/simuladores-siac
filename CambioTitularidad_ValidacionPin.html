@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SIAC UNICO - Validacion de PIN</title>
+<link rel="stylesheet" href="./assets_css_styles.css">
+</head>
+<body>
+<div id="top"></div>
+
+<div class="contenedor">
+  <div class="col-ficha" id="ficha"></div>
+
+  <div class="col-main">
+    <div class="panel">
+      <div class="panel-head">Ingrese el PIN de Validacion</div>
+      <div class="panel-body">
+
+        <div class="msg ok">Se envio PIN correctamente (mensaje recibido al presionar Enviar PIN).</div>
+
+        <div class="form-row">
+          <div class="form-col" style="flex:1 1 100%;">
+            <div class="campo" style="font-weight:bold;">
+              Para validar que la linea se encuentra activa, enviar el PIN de seguridad
+              haciendo click en el siguiente boton:
+            </div>
+            <button class="btn off" id="btnEnviarPin" disabled>Enviar PIN</button>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-col">
+            <label>Ingrese el PIN de seguridad enviado via SMS:</label>
+            <div class="campo"><input type="text" id="pin" maxlength="6" style="text-align:left;"></div>
+          </div>
+          <div class="form-col">
+            <div class="campo">
+              <button class="btn" id="btnValidar">Validar PIN</button>
+              <span class="timer" id="timer">00:02:00</span>
+              <a href="javascript:void(0)" id="lnkNoRecibio" style="margin-left:14px;">No recibio PIN?</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="nota-oblig">
+          PIN simulado para entrenamiento: 1234
+          <span class="simulado">DATO SIMULADO PARA ENTRENAMIENTO</span>
+        </div>
+
+        <div id="msg"></div>
+        <div class="msg warn" id="intentos">Intentos de validacion realizados: 0</div>
+
+        <div class="botonera">
+          <button class="btn rojo ico ico-home" id="btnCerrar">Cerrar</button>
+          <a class="btn secundario" href="./CambioTitularidad_CambioTitularidad.html">Volver</a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="./assets_js_app.js"></script>
+<script>
+  SIAC.layout({
+    titulo: "Cambio de Titularidad",
+    paso: "Validacion PIN",
+    ficha: true,
+    registrar: "Validacion PIN"
+  });
+
+  var intentos = 0;
+  var envios = 1;
+  var MAX_ENVIOS = 3;
+
+  var idTimer = SIAC.timer("timer", 120, function () {
+    SIAC.mensaje("msg", "warn", "El tiempo del PIN expiro. Debe presionar Enviar PIN nuevamente.");
+    SIAC.porId("btnEnviarPin").disabled = false;
+    SIAC.porId("btnEnviarPin").className = "btn";
+  });
+
+  SIAC.porId("btnValidar").onclick = function () {
+    var v = SIAC.porId("pin").value.trim();
+    intentos++;
+    SIAC.porId("intentos").innerHTML = "";
+    SIAC.porId("intentos").appendChild(
+      document.createTextNode("Intentos de validacion realizados: " + intentos));
+
+    if (!v) {
+      SIAC.mensaje("msg", "err", "Debe ingresar el codigo de PIN.");
+      SIAC.registrarError("Validacion PIN", "Validar PIN sin ingresar codigo", "Validacion");
+      return;
+    }
+    if (v === SIAC.DATOS.pinValido) {
+      clearInterval(idTimer);
+      SIAC.registrarPaso("Validacion PIN", "PIN validado correctamente");
+      SIAC.guardarDato("pinValidado", true);
+      SIAC.modal("Mensaje de Alerta", "Validacion de PIN Conforme", function () {
+        window.location.href = "./CambioTitularidad_LineasCuentaOrigen.html";
+      });
+    } else {
+      SIAC.registrarError("Validacion PIN", "PIN incorrecto (intento " + intentos + ")", "Validacion");
+      SIAC.porId("pin").value = "";
+      SIAC.porId("btnEnviarPin").disabled = false;
+      SIAC.porId("btnEnviarPin").className = "btn";
+      SIAC.mensaje("msg", "err", "PIN invalido o incorrecto. Ingrese un PIN valido");
+      SIAC.modal("Mensaje de Alerta", "PIN invalido o incorrecto. Ingrese un PIN valido", function () {
+        if (intentos >= 2) {
+          SIAC.mensaje("msg", "warn",
+            "No se pudo validar el PIN por segunda vez. Presione \"No recibio PIN?\" para solicitar la autorizacion del Jefe/Supervisor.");
+        }
+      });
+    }
+  };
+
+  SIAC.porId("btnEnviarPin").onclick = function () {
+    envios++;
+    if (envios > MAX_ENVIOS) {
+      SIAC.registrarError("Validacion PIN", "Supero la cantidad maxima de envios de PIN", "Regla de negocio");
+      SIAC.modal("Alerta",
+        "Se supero la cantidad maxima de intentos diarios para el envio del PIN de seguridad. Comuniquese con su jefe o supervisor.");
+      return;
+    }
+    SIAC.registrarPaso("Validacion PIN", "Reenvio de PIN (" + envios + ")");
+    clearInterval(idTimer);
+    idTimer = SIAC.timer("timer", 120, function () {
+      SIAC.mensaje("msg", "warn", "El tiempo del PIN expiro. Debe presionar Enviar PIN nuevamente.");
+    });
+    SIAC.porId("btnEnviarPin").disabled = true;
+    SIAC.porId("btnEnviarPin").className = "btn off";
+    SIAC.modal("Mensaje de Alerta", "Se envio PIN correctamente");
+  };
+
+  SIAC.porId("lnkNoRecibio").onclick = function () {
+    if (intentos < 2) {
+      SIAC.mensaje("msg", "warn",
+        "Segun el MDU, la autorizacion del Jefe/Supervisor se solicita cuando no se pudo validar el PIN por segunda vez.");
+      SIAC.registrarError("Validacion PIN", "Solicita autorizacion de supervisor antes del segundo intento fallido", "Regla de negocio");
+    }
+    SIAC.registrarPaso("Validacion PIN", "Presiona No recibio PIN?");
+    window.location.href = "./CambioTitularidad_ValidacionSupervisor.html";
+  };
+
+  SIAC.porId("btnCerrar").onclick = function () {
+    SIAC.registrarPaso("Validacion PIN", "Cierra la pagina");
+    window.location.href = "./CambioTitularidad_CambioTitularidad.html";
+  };
+</script>
+</body>
+</html>

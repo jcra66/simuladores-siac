@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SIAC UNICO - Buscar Cliente por N&deg; Linea</title>
+<link rel="stylesheet" href="./assets_css_styles.css">
+</head>
+<body>
+<div id="top"></div>
+
+<div class="contenedor">
+  <div class="col-ficha">
+    <div class="panel ficha">
+      <div class="panel-head">Datos del Cliente - Postpago</div>
+      <div class="panel-body">
+        <table>
+          <tr><td class="lbl">Cliente</td><td id="cCliente"></td></tr>
+          <tr><td class="lbl">Contacto</td><td id="cContacto"></td></tr>
+          <tr><td class="lbl">DNI/RUC</td><td id="cDoc"></td></tr>
+          <tr><td class="lbl">Cuenta</td><td id="cCuenta"></td></tr>
+          <tr><td class="lbl">Producto</td><td id="cProd"></td></tr>
+          <tr><td class="lbl">Representante Legal</td><td id="cRep"></td></tr>
+          <tr><td class="lbl">ID</td><td id="cId"></td></tr>
+          <tr><td class="lbl">Tel. Referencia 1</td><td id="cTel1"></td></tr>
+          <tr><td class="lbl">Tel. Referencia 2</td><td id="cTel2"></td></tr>
+          <tr><td class="lbl">Email</td><td id="cMail"></td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-main">
+    <div class="msg info">La Nueva Red Claro !!!</div>
+
+    <div class="panel">
+      <div class="panel-head gris-osc">3.2.2 Ingresamos el numero a consultar y presionamos enter</div>
+      <div class="panel-body">
+        <div class="form-row">
+          <div class="form-col">
+            <label>Criterio de busqueda:</label>
+            <div class="campo">
+              <select id="criterio">
+                <option>Telefono</option>
+                <option>Documento</option>
+                <option>Cuenta</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-col">
+            <label>N&deg; Linea:</label>
+            <div class="campo"><input type="text" id="nroLinea" value="" placeholder="Ingrese numero y presione Buscar"></div>
+          </div>
+        </div>
+        <div id="msg"></div>
+        <div class="botonera-izq">
+          <button class="btn" id="btnBuscar">Buscar</button>
+          <button class="btn secundario" id="btnDemo">Usar linea simulada 997320039</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" id="panelResultado" style="display:none;">
+      <div class="tabs">
+        <span class="activo">Datos de la Cuenta</span>
+        <span>Datos del Servicio</span>
+        <span>Datos de Facturacion</span>
+        <span>Datos de Pagos y Cobranzas</span>
+      </div>
+      <div class="panel-body">
+        <div class="form-row">
+          <div class="form-col"><label>Tipo Cliente</label><div class="campo">Consumer</div></div>
+          <div class="form-col"><label>Segmento</label><div class="campo">Basico</div></div>
+        </div>
+        <div class="form-row">
+          <div class="form-col"><label>Modalidad</label><div class="campo">Particular</div></div>
+          <div class="form-col"><label>Nicho ID</label><div class="campo">0</div></div>
+        </div>
+        <div class="form-row">
+          <div class="form-col"><label>Ciclo Fact.</label><div class="campo">04</div></div>
+          <div class="form-col"><label>Responsable Pago</label><div class="campo">Si</div></div>
+        </div>
+        <div class="form-row">
+          <div class="form-col"><label>Estado Cuenta</label><div class="campo">Activo</div></div>
+          <div class="form-col"><label>Limite Credito Abonado</label><div class="campo">160</div></div>
+        </div>
+        <div class="form-row">
+          <div class="form-col"><label>Fecha Activacion</label><div class="campo">21/12/2016 12:10:55 a.m.</div></div>
+          <div class="form-col"><label>Total Linea/Servicios</label><div class="campo">1</div></div>
+        </div>
+        <div class="botonera">
+          <a class="btn" href="./CambioTitularidad_MenuTransaccionesCuenta.html">Continuar a Transacciones por Cuenta</a>
+          <a class="btn secundario" href="./CambioTitularidad_DiagramaProceso.html">Volver</a>
+          <a class="btn gris" href="./index.html">Cancelar</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="./assets_js_app.js"></script>
+<script>
+  SIAC.layout({ titulo: "BUSCAR CLIENTE POR N&deg; LINEA", paso: "Busqueda Cliente", registrar: "Busqueda Cliente" });
+
+  function pintarFicha() {
+    var d = SIAC.DATOS;
+    var map = {
+      cCliente: d.cliente, cContacto: d.contacto, cDoc: d.documento, cCuenta: d.cuenta,
+      cProd: d.producto, cRep: d.repLegal, cId: d.customerId, cTel1: d.linea,
+      cTel2: "01" + d.linea, cMail: d.email
+    };
+    for (var k in map) {
+      if (map.hasOwnProperty(k)) {
+        var td = SIAC.porId(k);
+        td.innerHTML = "";
+        td.appendChild(document.createTextNode(map[k]));
+        td.appendChild(SIAC.el("span", "simulado", "SIMULADO"));
+      }
+    }
+  }
+
+  function buscar(valor) {
+    if (!valor) {
+      SIAC.mensaje("msg", "err", "Debe ingresar un numero a consultar.");
+      SIAC.registrarError("Busqueda Cliente", "Busqueda sin numero de linea", "Validacion");
+      return;
+    }
+    if (valor !== SIAC.DATOS.linea) {
+      SIAC.mensaje("msg", "err", "No se encontro ningun resultado.");
+      SIAC.registrarError("Busqueda Cliente", "Numero no existente: " + valor, "Resultado");
+      SIAC.modal("Alerta", "No se encontro ningun resultado.");
+      SIAC.porId("panelResultado").style.display = "none";
+      return;
+    }
+    SIAC.mensaje("msg", "ok", "Cliente encontrado. Datos del Cliente - Postpago cargados (SIMULADO).");
+    pintarFicha();
+    SIAC.porId("panelResultado").style.display = "block";
+    SIAC.registrarPaso("Busqueda Cliente", "Consulta de linea " + valor);
+  }
+
+  SIAC.porId("btnBuscar").onclick = function () { buscar(SIAC.porId("nroLinea").value.trim()); };
+  SIAC.porId("btnDemo").onclick = function () {
+    SIAC.porId("nroLinea").value = SIAC.DATOS.linea;
+    buscar(SIAC.DATOS.linea);
+  };
+  SIAC.porId("nroLinea").onkeydown = function (e) {
+    if (e.keyCode === 13) { buscar(this.value.trim()); }
+  };
+</script>
+</body>
+</html>

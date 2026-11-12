@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SIAC UNICO - Transacciones por Cuenta</title>
+<link rel="stylesheet" href="./assets_css_styles.css">
+</head>
+<body>
+<div id="top"></div>
+
+<div class="contenedor">
+  <div class="col-ficha" id="ficha"></div>
+
+  <div class="col-main">
+    <div class="panel">
+      <div class="panel-head">3.2.3 Seleccionamos la opcion Transacciones por Cuenta</div>
+      <div class="panel-body">
+        <div class="msg info">
+          3.2.4 Seleccionamos la opcion <b>Cambio de Titularidad</b>.
+          Tambien puede desplegar el menu superior "Transacciones por Cuenta".
+        </div>
+
+        <div class="panel">
+          <div class="panel-head gris-osc">Transacciones por Cuenta</div>
+          <div class="panel-body" id="listaOpciones"></div>
+        </div>
+
+        <div class="botonera">
+          <a class="btn" href="./CambioTitularidad_CambioTitularidad.html">Cambio de Titularidad</a>
+          <a class="btn secundario" href="./CambioTitularidad_BusquedaCliente.html">Volver</a>
+          <a class="btn gris" href="./index.html">Cancelar</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="./assets_js_app.js"></script>
+<script>
+  SIAC.layout({
+    titulo: "TRANSACCIONES POR CUENTA",
+    paso: "Busqueda Cliente",
+    ficha: true,
+    registrar: "Menu Transacciones por Cuenta"
+  });
+
+  var opciones = [
+    "A Servicios Masivos", "Activacion / Desactivacion Bolsa",
+    "Activacion / Desactivacion Bolsa RPM/RPMe/Servicio",
+    "Activacion / Desactivacion de Servicios", "Afiliacion Debito Automatico",
+    "Afiliacion Debito Automatico NP", "Ajuste OCC Atencion Cliente", "Anulacion OCC",
+    "Bolsa Compartida", "Calculo de Reintegro", "Cambio de Ciclo de Facturacion",
+    "Cambio de Datos", "Cambio de Datos Menores", "Cambio de Direccion de Facturacion",
+    "Cambio de Tipo de Cliente", "Cambio de Titularidad"
+  ];
+
+  var cont = SIAC.porId("listaOpciones");
+  opciones.forEach(function (o) {
+    var a = SIAC.el("a", "acordeon-item", o);
+    a.style.display = "block";
+    a.style.color = "#fff";
+    if (o === "Cambio de Titularidad") {
+      a.style.background = "#c8b800";
+      a.style.color = "#000";
+      a.href = "./CambioTitularidad_CambioTitularidad.html";
+      a.onclick = function () {
+        SIAC.registrarPaso("Menu Transacciones por Cuenta", "Selecciona Cambio de Titularidad");
+      };
+    } else {
+      a.href = "javascript:void(0)";
+      a.onclick = function () {
+        SIAC.modal("Alerta", "Opcion no incluida en este simulador de entrenamiento.");
+      };
+    }
+    cont.appendChild(a);
+  });
+</script>
+</body>
+</html>

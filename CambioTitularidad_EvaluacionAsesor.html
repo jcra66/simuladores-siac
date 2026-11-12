@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SIAC UNICO - Evaluacion del Asesor</title>
+<link rel="stylesheet" href="./assets_css_styles.css">
+</head>
+<body>
+<div id="top"></div>
+
+<div class="contenedor">
+  <div class="col-main">
+
+    <div class="panel">
+      <div class="panel-head">Resultado de la simulacion - Cambio de Titularidad</div>
+      <div class="panel-body">
+
+        <div class="resultado-caja">
+          <div id="calificacion"></div>
+          <div style="margin-top:10px;font-size:12px;" id="detalleResultado"></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head gris-osc">Recorrido realizado</div>
+          <div class="panel-body"><table class="tabla-eval" id="tablaPasos"></table></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head gris-osc">Errores cometidos y validaciones omitidas</div>
+          <div class="panel-body"><table class="tabla-eval" id="tablaErrores"></table></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head gris-osc">Reglas de negocio evaluadas</div>
+          <div class="panel-body"><table class="tabla-eval" id="tablaReglas"></table></div>
+        </div>
+
+        <div class="botonera">
+          <button class="btn" id="btnReiniciar">Reiniciar simulacion</button>
+          <a class="btn secundario" href="./index.html">Volver al Portal</a>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="./assets_js_app.js"></script>
+<script>
+  SIAC.layout({ titulo: "EVALUACION DEL ASESOR", paso: "Constancia" });
+
+  var pasos = SIAC.pasos();
+  var errores = SIAC.errores();
+
+  /* ---- Reglas obligatorias del flujo segun el MDU ---- */
+  var reglas = [
+    {
+      nombre: "Valido el PIN de seguridad o conto con autorizacion de Jefe/Supervisor",
+      ok: SIAC.obtenerDato("pinValidado", false) === true ||
+          SIAC.obtenerDato("autorizacionSupervisor", false) === true ||
+          SIAC.obtenerDato("pinEnviado", false) === false
+    },
+    {
+      nombre: "Selecciono al menos una linea a ceder",
+      ok: (SIAC.obtenerDato("lineasSeleccionadas", []) || []).length > 0
+    },
+    {
+      nombre: "Ejecuto la Evaluacion crediticia en SISACT (Sec)",
+      ok: !!SIAC.obtenerDato("sec", "")
+    },
+    {
+      nombre: "Definio el destino: cuenta existente o cuenta nueva",
+      ok: !!SIAC.obtenerDato("tipoDestino", "")
+    },
+    {
+      nombre: "Registro los datos del nuevo titular",
+      ok: !!SIAC.obtenerDato("nvoNroDoc", "")
+    },
+    {
+      nombre: "Grabo la transaccion (Se grabaron los datos correctamente)",
+      ok: SIAC.obtenerDato("grabado", false) === true
+    }
+  ];
+
+  var incumplidas = reglas.filter(function (r) { return !r.ok; });
+
+  /* ---- Calificacion ---- */
+  var clase, texto;
+  if (incumplidas.length === 0 && errores.length === 0) {
+    clase = "aprobado"; texto = "APROBADO";
+  } else if (incumplidas.length === 0 && errores.length <= 2) {
+    clase = "observado"; texto = "OBSERVADO";
+  } else {
+    clase = "reforzar"; texto = "REFORZAR CAPACITACION";
+  }
+
+  var cal = SIAC.el("span", "calif " + clase, texto);
+  SIAC.porId("calificacion").appendChild(cal);
+
+  var det = SIAC.porId("detalleResultado");
+  det.appendChild(document.createTextNode(
+    "Pasos registrados: " + pasos.length +
+    " | Errores y validaciones omitidas: " + errores.length +
+    " | Reglas incumplidas: " + incumplidas.length));
+
+  function cabecera(tabla, cols) {
+    var tr = SIAC.el("tr");
+    cols.forEach(function (c) { tr.appendChild(SIAC.el("th", null, c)); });
+    tabla.appendChild(tr);
+  }
+
+  var tp = SIAC.porId("tablaPasos");
+  cabecera(tp, ["#", "Hora", "Pantalla", "Accion"]);
+  if (!pasos.length) {
+    var trv = SIAC.el("tr");
+    var tdv = SIAC.el("td", null, "No se registro recorrido en esta sesion.");
+    tdv.colSpan = 4;
+    trv.appendChild(tdv);
+    tp.appendChild(trv);
+  } else {
+    pasos.forEach(function (p, i) {
+      var tr = SIAC.el("tr");
+      tr.appendChild(SIAC.el("td", null, String(i + 1)));
+      tr.appendChild(SIAC.el("td", null, p.hora));
+      tr.appendChild(SIAC.el("td", null, p.pantalla));
+      tr.appendChild(SIAC.el("td", null, p.accion));
+      tp.appendChild(tr);
+    });
+  }
+
+  var te = SIAC.porId("tablaErrores");
+  cabecera(te, ["#", "Hora", "Pantalla", "Tipo", "Detalle"]);
+  if (!errores.length) {
+    var tr2 = SIAC.el("tr");
+    var td2 = SIAC.el("td", null, "Sin errores registrados. Excelente desempeno.");
+    td2.colSpan = 5;
+    tr2.appendChild(td2);
+    te.appendChild(tr2);
+  } else {
+    errores.forEach(function (e, i) {
+      var tr = SIAC.el("tr");
+      tr.appendChild(SIAC.el("td", null, String(i + 1)));
+      tr.appendChild(SIAC.el("td", null, e.hora));
+      tr.appendChild(SIAC.el("td", null, e.pantalla));
+      tr.appendChild(SIAC.el("td", null, e.tipo));
+      tr.appendChild(SIAC.el("td", null, e.detalle));
+      te.appendChild(tr);
+    });
+  }
+
+  var tr3 = SIAC.porId("tablaReglas");
+  cabecera(tr3, ["Regla de negocio del MDU", "Resultado"]);
+  reglas.forEach(function (r) {
+    var tr = SIAC.el("tr");
+    tr.appendChild(SIAC.el("td", null, r.nombre));
+    var td = SIAC.el("td", null, r.ok ? "CUMPLIDA" : "INCUMPLIDA");
+    td.style.color = r.ok ? "#1d6b1d" : "#a01710";
+    td.style.fontWeight = "bold";
+    tr.appendChild(td);
+    tr3.appendChild(tr);
+  });
+
+  SIAC.porId("btnReiniciar").onclick = function () {
+    SIAC.reiniciar();
+    window.location.href = "./CambioTitularidad_AccesoSistema.html";
+  };
+</script>
+</body>
+</html>

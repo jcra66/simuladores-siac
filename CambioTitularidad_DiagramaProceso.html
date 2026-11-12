@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SIAC UNICO - Diagrama del Proceso de Negocio</title>
+<link rel="stylesheet" href="./assets_css_styles.css">
+</head>
+<body>
+<div id="top"></div>
+
+<div class="contenedor">
+  <div class="col-main">
+
+    <div class="panel">
+      <div class="panel-head">3.2 Diagrama del proceso de negocio, validacion PIN</div>
+      <div class="panel-body">
+        <div class="msg info">
+          El Sistema SiacUnico Account realizara el registro de Cambio de titularidad.
+        </div>
+
+        <table class="tabla-eval">
+          <tr><th style="width:60px;">Paso</th><th>Actividad del flujo</th><th style="width:260px;">Resultado</th></tr>
+          <tr><td>1</td><td>Ingresar al Aplicativo del SIACUNICO</td><td>Pantalla principal</td></tr>
+          <tr><td>2</td><td>Buscar Cliente por N&deg; linea (ingresar numero y presionar enter)</td><td>Datos del Cliente - Postpago</td></tr>
+          <tr><td>3</td><td>Seleccionar Transacciones por Cuenta &gt; Cambio de Titularidad</td><td>Pagina principal de Cambio de Titularidad</td></tr>
+          <tr><td>4</td><td>Presionar Enviar PIN</td><td>Perfil con permiso: "Su perfil no necesita esta validacion"<br>Perfil sin permiso: "Se envio PIN correctamente"</td></tr>
+          <tr><td>5</td><td>Ingresar PIN enviado via SMS y presionar Validar PIN</td><td>Correcto: "Validacion de PIN Conforme"<br>Incorrecto: "PIN invalido o incorrecto. Ingrese un PIN valido"</td></tr>
+          <tr><td>6</td><td>Si no se valida el PIN por segunda vez, presionar "No recibio PIN?"</td><td>Pop-up Autorizacion (usuario y clave Jefe/Supervisor)</td></tr>
+          <tr><td>7</td><td>Ingresar usuario y clave del Jefe/Supervisor y presionar Aceptar</td><td>"Puede continuar con la transaccion"</td></tr>
+          <tr><td>8</td><td>Seleccionar una o varias lineas a transferir</td><td>Lineas de la Cuenta Origen / Total reintegro Con IGV(S/)</td></tr>
+          <tr><td>9</td><td>Transferir en Cuenta Existente (si el cliente tiene cuenta) o Crear Cuenta</td><td>Cuenta destino o Datos del Nuevo Cliente</td></tr>
+          <tr><td>10</td><td>Registrar Datos de Identificacion Personal, Datos de Contacto y Direccion de Facturacion</td><td>Datos del nuevo titular</td></tr>
+          <tr><td>11</td><td>Presionar Guardar y Aceptar</td><td>"&iquest;Esta seguro de Grabar?" / "Se grabaron los datos correctamente"</td></tr>
+          <tr><td>12</td><td>Presionar Constancia</td><td>C-31 Solicitud de Cambio de Titularidad</td></tr>
+        </table>
+
+        <div class="panel" style="margin-top:12px;">
+          <div class="panel-head gris-osc">Botones de la transaccion (MDU 1.2.2)</div>
+          <div class="panel-body">
+            <table class="tabla-eval">
+              <tr><th style="width:280px;">Nombre</th><th>Descripcion</th></tr>
+              <tr><td>Evaluacion</td><td>Permite redireccionar a SISACT para realizar la evaluacion crediticia al nuevo titular.</td></tr>
+              <tr><td>Transferir en Cuenta Existente</td><td>Permite transferir a una cuenta ya existente.</td></tr>
+              <tr><td>Crear Cuenta</td><td>Permite crear una cuenta nueva.</td></tr>
+              <tr><td>Guardar</td><td>Permite guardar el registro para finalizar la transaccion.</td></tr>
+              <tr><td>Cerrar</td><td>Permite cerrar la pagina.</td></tr>
+              <tr><td>Constancia</td><td>Permite abrir Constancia.</td></tr>
+              <tr><td>Enviar PIN</td><td>Permite enviar PIN.</td></tr>
+              <tr><td>Validar PIN</td><td>Permite validar PIN.</td></tr>
+              <tr><td>No recibio PIN?</td><td>Permite mostrar Pop-up para ingresar clave de Jefe/Supervisor.</td></tr>
+            </table>
+          </div>
+        </div>
+
+        <div class="botonera">
+          <a class="btn" href="./CambioTitularidad_BusquedaCliente.html">Continuar</a>
+          <a class="btn secundario" href="./CambioTitularidad_AccesoSistema.html">Volver</a>
+          <a class="btn gris" href="./index.html">Cancelar</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="./assets_js_app.js"></script>
+<script>
+  SIAC.layout({ titulo: "DIAGRAMA DEL PROCESO - CAMBIO DE TITULARIDAD", registrar: "Diagrama del Proceso" });
+</script>
+</body>
+</html>

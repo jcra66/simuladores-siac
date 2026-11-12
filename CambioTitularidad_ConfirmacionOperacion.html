@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SIAC UNICO - Confirmacion de la Operacion</title>
+<link rel="stylesheet" href="./assets_css_styles.css">
+</head>
+<body>
+<div id="top"></div>
+
+<div class="contenedor">
+  <div class="col-ficha" id="ficha"></div>
+
+  <div class="col-main">
+
+    <div class="msg info">
+      3.2.21 Presionamos Guardar. 3.2.22 Presionamos Aceptar.
+      3.2.23 Se mostrara el mensaje de exito.
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">Resumen de la Operacion - Cambio de Titularidad</div>
+      <div class="panel-body">
+        <table class="tabla-eval" id="resumen"></table>
+
+        <div id="msg"></div>
+
+        <div class="botonera">
+          <button class="btn secundario ico ico-save" id="btnGuardar">Guardar</button>
+          <button class="btn secundario ico ico-doc off" id="btnConstancia" disabled>Constancia</button>
+          <button class="btn rojo ico ico-home" id="btnCerrar">Cerrar</button>
+          <a class="btn gris" href="./CambioTitularidad_DireccionFacturacion.html">Volver</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="./assets_js_app.js"></script>
+<script>
+  SIAC.layout({
+    titulo: "Cambio de Titularidad",
+    paso: "Confirmacion",
+    ficha: true,
+    registrar: "Confirmacion de la Operacion"
+  });
+
+  var lineas = SIAC.obtenerDato("lineasSeleccionadas", []);
+  var filas = [
+    ["Motivo", SIAC.obtenerDato("motivo", "A solicitud del cliente")],
+    ["Solicitante", SIAC.obtenerDato("solicitante", "TITULAR")],
+    ["Validacion de PIN", SIAC.obtenerDato("pinValidado", false) ? "Conforme" :
+      (SIAC.obtenerDato("autorizacionSupervisor", false) ? "Autorizada por Jefe/Supervisor" : "Perfil sin validacion de PIN")],
+    ["Lineas a ceder", lineas.length ? lineas.join(", ") : "[POR DEFINIR]"],
+    ["Total reintegro Con IGV(S/)", SIAC.obtenerDato("totalReintegro", "0.00")],
+    ["Sec (Evaluacion SISACT)", SIAC.obtenerDato("sec", "[POR DEFINIR]")],
+    ["Destino", SIAC.obtenerDato("tipoDestino", "[POR DEFINIR]")],
+    ["Cuenta destino", SIAC.obtenerDato("cuentaDestino", "[POR DEFINIR]")],
+    ["Nuevo titular", (SIAC.obtenerDato("nvoNombre", "") + " " + SIAC.obtenerDato("nvoApellidos", "")).trim() || "[POR DEFINIR]"],
+    ["Documento nuevo titular", SIAC.obtenerDato("nvoTipoDoc", "DNI") + " " + SIAC.obtenerDato("nvoNroDoc", "[POR DEFINIR]")],
+    ["Fecha de Programacion", SIAC.obtenerDato("fechaProg", "11/11/2026")],
+    ["Envio por E-mail", SIAC.obtenerDato("envioMail", SIAC.DATOS.email)],
+    ["Punto de Atencion", SIAC.obtenerDato("puntoAtencion", "Seleccionar")],
+    ["Notas", SIAC.obtenerDato("notas", "")]
+  ];
+
+  var t = SIAC.porId("resumen");
+  var trh = SIAC.el("tr");
+  trh.appendChild(SIAC.el("th", null, "Concepto"));
+  trh.appendChild(SIAC.el("th", null, "Valor registrado"));
+  t.appendChild(trh);
+  filas.forEach(function (f) {
+    var tr = SIAC.el("tr");
+    tr.appendChild(SIAC.el("td", null, f[0]));
+    tr.appendChild(SIAC.el("td", null, String(f[1])));
+    t.appendChild(tr);
+  });
+
+  SIAC.porId("btnGuardar").onclick = function () {
+    if (!lineas.length) {
+      SIAC.modal("Alerta", "Seleccione Lineas Disponibles");
+      SIAC.registrarError("Confirmacion de la Operacion", "Guardado sin lineas seleccionadas", "Validacion");
+      return;
+    }
+    SIAC.modal("Confirmar", "\u00BF Esta seguro de Grabar ?", function () {
+      SIAC.registrarPaso("Confirmacion de la Operacion", "Confirma el grabado de la transaccion");
+      SIAC.guardarDato("grabado", true);
+      SIAC.guardarDato("nroCaso", "2276365");
+      SIAC.modal("Alerta", "Se grabaron los datos correctamente", function () {
+        SIAC.mensaje("msg", "ok",
+          "Se grabaron los datos correctamente. N\u00B0 Caso/Solicitud: 2276365 (SIMULADO). Presione Constancia.");
+        var b = SIAC.porId("btnConstancia");
+        b.disabled = false;
+        b.className = "btn secundario ico ico-doc";
+      });
+    }, true, function () {
+      SIAC.registrarPaso("Confirmacion de la Operacion", "Cancela el grabado");
+    });
+  };
+
+  SIAC.porId("btnConstancia").onclick = function () {
+    SIAC.registrarPaso("Confirmacion de la Operacion", "Presiona Constancia");
+    window.location.href = "./CambioTitularidad_Constancia.html";
+  };
+
+  SIAC.porId("btnCerrar").onclick = function () {
+    SIAC.registrarPaso("Confirmacion de la Operacion", "Cierra la pagina");
+    window.location.href = "./CambioTitularidad_EvaluacionAsesor.html";
+  };
+</script>
+</body>
+</html>

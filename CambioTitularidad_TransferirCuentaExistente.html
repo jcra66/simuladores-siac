@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SIAC UNICO - Transferir en Cuenta Existente</title>
+<link rel="stylesheet" href="./assets_css_styles.css">
+</head>
+<body>
+<div id="top"></div>
+
+<div class="contenedor">
+  <div class="col-ficha" id="ficha"></div>
+
+  <div class="col-main">
+
+    <div class="msg info">
+      3.2.16 Presionamos Transferir en Cuenta Existente, si el cliente quiere transferir
+      sus lineas a una de sus cuentas.
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">Cuentas Existentes del Cliente</div>
+      <div class="panel-body">
+        <table class="grilla">
+          <thead>
+            <tr>
+              <th style="width:60px;">SEL</th>
+              <th>CUENTA</th>
+              <th>TITULAR</th>
+              <th>ESTADO</th>
+              <th>CICLO FACT.</th>
+            </tr>
+          </thead>
+          <tbody id="cuerpo"></tbody>
+        </table>
+
+        <div class="total-reintegro">
+          Lineas a transferir: <span id="lineasSel">-</span> |
+          Total reintegro Con IGV(S/): <span id="totalReintegro">0.00</span>
+        </div>
+
+        <div id="msg"></div>
+
+        <div class="botonera">
+          <button class="btn" id="btnAceptar">Aceptar cuenta destino</button>
+          <a class="btn secundario" href="./CambioTitularidad_LineasCuentaOrigen.html">Volver</a>
+          <button class="btn rojo ico ico-home" id="btnCerrar">Cerrar</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="./assets_js_app.js"></script>
+<script>
+  SIAC.layout({
+    titulo: "Cambio de Titularidad",
+    paso: "Lineas Cuenta Origen",
+    ficha: true,
+    registrar: "Transferir en Cuenta Existente"
+  });
+
+  var sel = SIAC.obtenerDato("lineasSeleccionadas", []);
+  SIAC.porId("lineasSel").innerHTML = "";
+  SIAC.porId("lineasSel").appendChild(document.createTextNode(sel.length ? sel.join(", ") : "-"));
+  SIAC.porId("totalReintegro").innerHTML = "";
+  SIAC.porId("totalReintegro").appendChild(
+    document.createTextNode(SIAC.obtenerDato("totalReintegro", "0.00")));
+
+  var cuerpo = SIAC.porId("cuerpo");
+  SIAC.DATOS.cuentasDestino.forEach(function (c, i) {
+    var tr = SIAC.el("tr");
+    var td0 = SIAC.el("td");
+    var r = SIAC.el("input");
+    r.type = "radio";
+    r.name = "cuentaDestino";
+    r.className = "rdCuenta";
+    r.style.width = "auto";
+    r.setAttribute("data-cuenta", c.cuenta);
+    td0.appendChild(r);
+    tr.appendChild(td0);
+    tr.appendChild(SIAC.el("td", null, c.cuenta));
+    var tdt = SIAC.el("td", null, c.titular);
+    tdt.appendChild(SIAC.el("span", "simulado", "SIMULADO"));
+    tr.appendChild(tdt);
+    tr.appendChild(SIAC.el("td", null, c.estado));
+    tr.appendChild(SIAC.el("td", null, c.ciclo));
+    cuerpo.appendChild(tr);
+  });
+
+  SIAC.porId("btnAceptar").onclick = function () {
+    var r = document.querySelector("input[name=cuentaDestino]:checked");
+    if (!r) {
+      SIAC.modal("Alerta", "Debe seleccionar una cuenta destino");
+      SIAC.mensaje("msg", "err", "Debe seleccionar una cuenta destino");
+      SIAC.registrarError("Transferir en Cuenta Existente", "No selecciono cuenta destino", "Validacion");
+      return;
+    }
+    SIAC.guardarDato("cuentaDestino", r.getAttribute("data-cuenta"));
+    SIAC.guardarDato("tipoDestino", "CUENTA EXISTENTE");
+    SIAC.registrarPaso("Transferir en Cuenta Existente",
+      "Cuenta destino: " + r.getAttribute("data-cuenta"));
+    SIAC.mensaje("msg", "ok", "Cuenta destino seleccionada. Puede continuar con el guardado.");
+    window.location.href = "./CambioTitularidad_ConfirmacionOperacion.html";
+  };
+
+  SIAC.porId("btnCerrar").onclick = function () {
+    SIAC.registrarPaso("Transferir en Cuenta Existente", "Cierra la pagina");
+    window.location.href = "./CambioTitularidad_CambioTitularidad.html";
+  };
+</script>
+</body>
+</html>
