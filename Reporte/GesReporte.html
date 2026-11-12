@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SIAC ÚNICO - Reporte de Trazabilidad y Desempeño</title>
+<link rel="stylesheet" href="../assets_css_styles.css">
+</head>
+<body>
+<div id="hdr"></div>
+<div class="container">
+  <div class="breadcrumb">Portal &gt; Reportes &gt; Trazabilidad de Simulaciones</div>
+  <h1 class="page-title">Reporte de Trazabilidad y Desempeño (DATOS SIMULADOS)</h1>
+  <div id="msg" class="oculto"></div>
+
+  <div class="panel">
+    <div class="panel-header">FILTROS</div>
+    <div class="panel-body">
+      <div class="form-row">
+        <div class="form-group"><label>Asesor / Usuario:</label><select id="fAsesor"></select></div>
+        <div class="form-group"><label>Perfil:</label><select id="fPerfil"></select></div>
+        <div class="form-group"><label>Transacción:</label><select id="fTrx"></select></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Fecha inicial:</label><input type="date" id="fDesde"></div>
+        <div class="form-group"><label>Fecha final:</label><input type="date" id="fHasta"></div>
+        <div class="form-group"><label>Estado:</label>
+          <select id="fEstado"><option value="">Todos</option><option>Completada</option><option>Cancelada</option><option>Incompleta</option><option>En curso</option></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Resultado:</label>
+          <select id="fResultado"><option value="">Todos</option><option>Aprobado</option><option>Observado</option><option>Reforzar capacitación</option></select>
+        </div>
+        <div class="form-group"><label>Puntaje mínimo:</label><input type="number" id="fPunMin" min="0" max="100" value=""></div>
+        <div class="form-group"><label>Puntaje máximo:</label><input type="number" id="fPunMax" min="0" max="100" value=""></div>
+      </div>
+      <div class="botonera">
+        <button type="button" class="btn" onclick="pintar()">Buscar</button>
+        <button type="button" class="btn btn-secondary" onclick="limpiar()">Limpiar</button>
+        <button type="button" class="btn btn-dark" onclick="exportar()">Exportar CSV</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">INDICADORES DEL FILTRO APLICADO</div>
+    <div class="panel-body"><div class="cards" id="kpis"></div></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">SESIONES DE SIMULACIÓN</div>
+    <div class="panel-body">
+      <table class="grid">
+        <thead><tr>
+          <th>ID Sesión</th><th>Asesor</th><th>Transacción</th><th>Inicio</th><th>Fin</th>
+          <th>Duración</th><th>Pant.</th><th>Errores</th><th>Omitidas</th><th>Puntaje</th><th>Estado</th><th>Resultado</th><th>Detalle</th>
+        </tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel oculto" id="panelDet">
+    <div class="panel-header" id="detTitulo">TRAZABILIDAD DE LA SESIÓN</div>
+    <div class="panel-body">
+      <div class="msg msg-warn">Los datos mostrados corresponden al entorno de entrenamiento y son <b>SIMULADOS</b>.</div>
+      <h3 style="font-size:13px">Tiempo por pantalla</h3>
+      <table class="grid" id="tblPant"><thead><tr><th>#</th><th>Pantalla</th><th style="width:140px">Tiempo</th></tr></thead><tbody></tbody></table>
+      <h3 style="font-size:13px;margin-top:14px">Recorrido cronológico</h3>
+      <table class="grid" id="tblEv"><thead><tr><th style="width:160px">Fecha/Hora</th><th>Pantalla</th><th>Acción / Decisión</th><th>Resultado de validación</th></tr></thead><tbody></tbody></table>
+      <div class="botonera"><button type="button" class="btn btn-secondary" onclick="cerrarDetalle()">Cerrar detalle</button></div>
+    </div>
+  </div>
+</div>
+<div class="footer-nota">
+  ENTORNO DE ENTRENAMIENTO · Las sesiones provienen del almacenamiento local de este navegador.
+  No existe consolidación automática entre distintos equipos o navegadores.
+</div>
+
+<script>window.SIAC_BASE = '../';</script>
+<script src="../assets_js_data.js"></script>
+<script src="../assets_js_auth.js"></script>
+<script src="../assets_js_app.js"></script>
+<script>
+var ses = SIACAUTH.exigir(null);
+if (ses) {
+var soloPropios = ses.permisos.indexOf('reportes.ver') < 0;
+if (soloPropios && ses.permisos.indexOf('reportes.propios') < 0) { SIACAUTH.exigir('reportes.ver'); }
+SIACAUTH.pintarHeader('hdr', { activo: 'reportes' });
+
+if (soloPropios) APP.mensaje('msg', 'Su perfil solo puede consultar <b>sus propias</b> sesiones de entrenamiento.', 'info');
+
+/* ---- Carga de combos ---- */
+(function () {
+  var usuarios = SIACDATA.usuarios();
+  var h = '<option value="">Todos</option>';
+  usuarios.forEach(function (u) { h += '<option value="' + u.id + '">' + APP.esc(u.nombre + ' (' + u.usuario + ')') + '</option>'; });
+  var selA = document.getElementById('fAsesor');
+  selA.innerHTML = h;
+  if (soloPropios) { selA.value = ses.usuarioId; selA.disabled = true; }
+
+  var hp = '<option value="">Todos</option>';
+  SIACDATA.perfiles().forEach(function (p) { hp += '<option value="' + p.id + '">' + APP.esc(p.nombre) + '</option>'; });
+  document.getElementById('fPerfil').innerHTML = hp;
+
+  var ht = '<option value="">Todas</option>';
+  SIACDATA.transacciones().forEach(function (t) { ht += '<option value="' + t.id + '">' + APP.esc(t.nombre) + '</option>'; });
+  document.getElementById('fTrx').innerHTML = ht;
+})();
+
+function filtrar() {
+  var a = document.getElementById('fAsesor').value,
+      p = document.getElementById('fPerfil').value,
+      t = document.getElementById('fTrx').value,
+      d = document.getElementById('fDesde').value,
+      h = document.getElementById('fHasta').value,
+      e = document.getElementById('fEstado').value,
+      r = document.getElementById('fResultado').value,
+      pmin = document.getElementById('fPunMin').value,
+      pmax = document.getElementById('fPunMax').value;
+
+  return SIACDATA.sesiones().filter(function (s) {
+    if (soloPropios && s.usuarioId !== ses.usuarioId) return false;
+    if (a && s.usuarioId !== a) return false;
+    if (p && s.perfil !== p) return false;
+    if (t && s.trxId !== t) return false;
+    if (d && APP.soloFecha(s.inicio) < d) return false;
+    if (h && APP.soloFecha(s.inicio) > h) return false;
+    if (e && s.estado !== e) return false;
+    if (r && s.resultado !== r) return false;
+    if (pmin !== '' && Number(s.puntaje) < Number(pmin)) return false;
+    if (pmax !== '' && Number(s.puntaje) > Number(pmax)) return false;
+    return true;
+  });
+}
+
+function pintar() {
+  var lista = filtrar();
+  var tb = document.getElementById('tbody');
+  if (!lista.length) {
+    tb.innerHTML = '<tr><td colspan="13" class="grid-empty">No se encontró ningún resultado.</td></tr>';
+  } else {
+    tb.innerHTML = lista.map(function (s) {
+      var cls = s.resultado === 'Aprobado' ? 'badge-ok' : (s.resultado === 'Observado' ? 'badge-warn' : 'badge-err');
+      return '<tr><td>' + s.id + (s.demo ? ' <span class="badge badge-sim">MUESTRA</span>' : '') + '</td><td>' + APP.esc(s.asesor) +
+        '</td><td>' + APP.esc(s.trx) + '</td><td>' + APP.fecha(s.inicio) + '</td><td>' + (s.fin ? APP.fecha(s.fin) : '-') +
+        '</td><td>' + APP.hhmmss(s.duracion) + '</td><td style="text-align:center">' + (s.pantallas ? s.pantallas.length : 0) +
+        '</td><td style="text-align:center">' + s.errores + '</td><td style="text-align:center">' + s.omitidas +
+        '</td><td style="text-align:right">' + s.puntaje + '</td><td>' + s.estado +
+        '</td><td><span class="badge ' + cls + '">' + s.resultado + '</span></td>' +
+        '<td style="text-align:center"><button class="btn btn-sm" onclick="detalle(\'' + s.id + '\')">Ver</button></td></tr>';
+    }).join('');
+  }
+  kpis(lista);
+}
+
+function kpis(lista) {
+  var ini = lista.length,
+      comp = lista.filter(function (s) { return s.estado === 'Completada'; }).length,
+      canc = lista.filter(function (s) { return s.estado === 'Cancelada'; }).length,
+      inc = lista.filter(function (s) { return s.estado === 'Incompleta'; }).length,
+      dur = ini ? Math.round(lista.reduce(function (m, s) { return m + (s.duracion || 0); }, 0) / ini) : 0,
+      pun = ini ? Math.round(lista.reduce(function (m, s) { return m + (s.puntaje || 0); }, 0) / ini) : 0,
+      apro = lista.filter(function (s) { return s.resultado === 'Aprobado'; }).length,
+      tasa = ini ? Math.round(apro * 100 / ini) : 0;
+  var errores = {};
+  lista.forEach(function (s) {
+    (s.eventos || []).forEach(function (ev) {
+      if ((ev.resultado || '').indexOf('ERROR') === 0) {
+        var k = ev.resultado.replace('ERROR: ', '');
+        errores[k] = (errores[k] || 0) + 1;
+      }
+    });
+  });
+  var top = Object.keys(errores).sort(function (a, b) { return errores[b] - errores[a]; }).slice(0, 3)
+    .map(function (k) { return '<li>' + APP.esc(k) + ' <b>(' + errores[k] + ')</b></li>'; }).join('') || '<li>Sin errores registrados</li>';
+
+  document.getElementById('kpis').innerHTML =
+    tarjeta('Simulaciones', 'Iniciadas: <b>' + ini + '</b><br>Completadas: <b>' + comp + '</b><br>Canceladas: <b>' + canc + '</b><br>Incompletas: <b>' + inc + '</b>') +
+    tarjeta('Tiempos', 'Duración media: <b>' + APP.hhmmss(dur) + '</b>') +
+    tarjeta('Desempeño', 'Puntaje medio: <b>' + pun + '</b><br>Tasa de aprobación: <b>' + tasa + '%</b><br>' +
+      '<span style="font-size:10px">Umbral de la rúbrica didáctica configurable: Aprobado &ge; ' + SIACDATA.RUBRICA.aprobado +
+      ', Observado &ge; ' + SIACDATA.RUBRICA.observado + '. No es una regla del MDU.</span>') +
+    tarjeta('Errores frecuentes', '<ul style="margin:0;padding-left:16px">' + top + '</ul>');
+}
+function tarjeta(t, c) {
+  return '<div class="card"><div class="card-head">' + t + '</div><div class="card-body">' + c + '</div></div>';
+}
+
+function detalle(id) {
+  var s = SIACDATA.sesiones().filter(function (x) { return x.id === id; })[0];
+  if (!s) return;
+  if (soloPropios && s.usuarioId !== ses.usuarioId) { APP.mensaje('msg', 'No autorizado a ver esa sesión.', 'error'); return; }
+  document.getElementById('detTitulo').textContent = 'TRAZABILIDAD DE LA SESIÓN ' + s.id + ' - ' + s.asesor;
+  var tp = document.querySelector('#tblPant tbody');
+  tp.innerHTML = (s.pantallas || []).map(function (p, i) {
+    return '<tr><td style="text-align:center">' + (i + 1) + '</td><td>' + APP.esc(p.pantalla) + '</td><td>' + APP.hhmmss(p.seg) + '</td></tr>';
+  }).join('') || '<tr><td colspan="3" class="grid-empty">Sin registro por pantalla.</td></tr>';
+  var te = document.querySelector('#tblEv tbody');
+  te.innerHTML = (s.eventos || []).map(function (e) {
+    var clase = (e.resultado || '').indexOf('ERROR') === 0 ? ' style="color:#a3251a;font-weight:bold"' : '';
+    return '<tr><td>' + APP.fecha(e.ts) + '</td><td>' + APP.esc(e.pantalla) + '</td><td>' + APP.esc(e.accion) +
+      '</td><td' + clase + '>' + APP.esc(e.resultado) + '</td></tr>';
+  }).join('') || '<tr><td colspan="4" class="grid-empty">Sin eventos registrados.</td></tr>';
+  document.getElementById('panelDet').className = 'panel';
+  document.getElementById('panelDet').scrollIntoView({ behavior: 'smooth' });
+}
+function cerrarDetalle() { document.getElementById('panelDet').className = 'panel oculto'; }
+
+function limpiar() {
+  ['fPerfil', 'fTrx', 'fDesde', 'fHasta', 'fEstado', 'fResultado', 'fPunMin', 'fPunMax'].forEach(function (i) { document.getElementById(i).value = ''; });
+  if (!soloPropios) document.getElementById('fAsesor').value = '';
+  cerrarDetalle();
+  pintar();
+}
+
+function exportar() {
+  var lista = filtrar();
+  if (!lista.length) { APP.mensaje('msg', 'No hay registros para exportar con los filtros aplicados.', 'warn'); return; }
+  var cab = ['ID Sesion', 'Usuario', 'Asesor', 'Perfil', 'Transaccion', 'Inicio', 'Fin', 'Duracion (HH:MM:SS)',
+    'Pantallas', 'Recorrido', 'Errores', 'Validaciones omitidas', 'Puntaje', 'Estado', 'Resultado', 'Origen'];
+  var filas = lista.map(function (s) {
+    return [s.id, s.usuario, s.asesor, s.perfil, s.trx, APP.fecha(s.inicio), s.fin ? APP.fecha(s.fin) : '',
+      APP.hhmmss(s.duracion), (s.pantallas || []).length,
+      (s.pantallas || []).map(function (p) { return p.pantalla + ' (' + APP.hhmmss(p.seg) + ')'; }).join(' > '),
+      s.errores, s.omitidas, s.puntaje, s.estado, s.resultado, s.demo ? 'MUESTRA SIMULADA' : 'EJECUCION REGISTRADA'];
+  });
+  APP.exportarCSV('ReporteTrazabilidadSIAC_SIMULADO.csv', cab, filas);
+  APP.mensaje('msg', 'Archivo CSV generado con ' + lista.length + ' registro(s).', 'ok');
+}
+
+pintar();
+}
+</script>
+</body>
+</html>
