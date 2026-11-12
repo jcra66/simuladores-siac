@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SIAC ÚNICO - Mantenimiento de Usuarios</title>
+<link rel="stylesheet" href="../assets_css_styles.css">
+</head>
+<body>
+<div id="hdr"></div>
+<div class="container">
+  <div class="breadcrumb">Portal &gt; Administración &gt; Mantenimiento de Usuarios</div>
+  <h1 class="page-title">Mantenimiento de Usuarios (SIMULADO)</h1>
+  <div id="msg" class="oculto"></div>
+
+  <div class="panel">
+    <div class="panel-header">FILTROS DE BÚSQUEDA</div>
+    <div class="panel-body">
+      <div class="form-row">
+        <div class="form-group"><label>Usuario / Nombre:</label><input type="text" id="fTexto" placeholder="Ej. asesor01"></div>
+        <div class="form-group"><label>Perfil:</label><select id="fPerfil"></select></div>
+        <div class="form-group"><label>Estado:</label>
+          <select id="fEstado"><option value="">Todos</option><option>Activo</option><option>Inactivo</option></select>
+        </div>
+      </div>
+      <div class="botonera">
+        <button type="button" class="btn" onclick="pintar()">Buscar</button>
+        <button type="button" class="btn btn-secondary" onclick="limpiarFiltros()">Limpiar</button>
+        <button type="button" class="btn btn-dark" onclick="nuevo()">Nuevo</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">USUARIOS REGISTRADOS</div>
+    <div class="panel-body">
+      <table class="grid">
+        <thead><tr>
+          <th style="width:70px">ID</th><th>Usuario</th><th>Nombre</th><th style="width:120px">Perfil</th>
+          <th style="width:80px">Estado</th><th style="width:100px">Creación</th><th style="width:230px">Acciones</th>
+        </tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel oculto" id="panelForm">
+    <div class="panel-header" id="formTitulo">NUEVO USUARIO</div>
+    <div class="panel-body">
+      <div id="msgForm" class="oculto"></div>
+      <input type="hidden" id="fId">
+      <div class="form-row">
+        <div class="form-group"><label>Usuario <span class="obligatorio">(*)</span></label><input type="text" id="cUsuario" maxlength="20"></div>
+        <div class="form-group"><label>Nombre <span class="obligatorio">(*)</span></label><input type="text" id="cNombre" maxlength="60"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Perfil <span class="obligatorio">(*)</span></label><select id="cPerfil"></select></div>
+        <div class="form-group"><label>Estado <span class="obligatorio">(*)</span></label>
+          <select id="cEstado"><option>Activo</option><option>Inactivo</option></select></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Contraseña <span class="obligatorio">(*)</span></label><input type="password" id="cClave" maxlength="30"></div>
+        <div class="form-group"><label>Confirmar <span class="obligatorio">(*)</span></label><input type="password" id="cClave2" maxlength="30"></div>
+      </div>
+      <div class="msg msg-info">
+        Regla local de contraseña (DEMOSTRACIÓN): mínimo 8 caracteres, al menos una mayúscula, un número y un carácter especial.
+        Las contraseñas son ficticias y se guardan solo en el navegador. El MDU no documenta política de contraseñas: <b>[POR DEFINIR]</b>.
+      </div>
+      <div class="botonera">
+        <button type="button" class="btn" onclick="guardar()">Guardar</button>
+        <button type="button" class="btn btn-secondary" onclick="cancelar()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="footer-nota">ENTORNO DE ENTRENAMIENTO · Datos ficticios</div>
+
+<script>window.SIAC_BASE = '../';</script>
+<script src="../assets_js_data.js"></script>
+<script src="../assets_js_auth.js"></script>
+<script src="../assets_js_app.js"></script>
+<script>
+var ses = SIACAUTH.exigir('usuarios.ver');
+if (ses) {
+SIACAUTH.pintarHeader('hdr', { activo: 'usuarios' });
+
+function perfilesOpts(sel, incluirTodos) {
+  var p = SIACDATA.perfiles(), h = incluirTodos ? '<option value="">Todos</option>' : '';
+  p.forEach(function (x) { h += '<option value="' + x.id + '">' + APP.esc(x.nombre) + '</option>'; });
+  sel.innerHTML = h;
+}
+perfilesOpts(document.getElementById('fPerfil'), true);
+perfilesOpts(document.getElementById('cPerfil'), false);
+
+function nombrePerfil(id) { var p = SIACDATA.perfilPorId(id); return p ? p.nombre : '(sin perfil)'; }
+
+function pintar() {
+  var txt = document.getElementById('fTexto').value.toLowerCase().trim();
+  var per = document.getElementById('fPerfil').value;
+  var est = document.getElementById('fEstado').value;
+  var lista = SIACDATA.usuarios().filter(function (u) {
+    if (txt && (u.usuario + ' ' + u.nombre).toLowerCase().indexOf(txt) < 0) return false;
+    if (per && u.perfil !== per) return false;
+    if (est && u.estado !== est) return false;
+    return true;
+  });
+  var tb = document.getElementById('tbody');
+  if (!lista.length) { tb.innerHTML = '<tr><td colspan="7" class="grid-empty">No se encontró ningún resultado.</td></tr>'; return; }
+  tb.innerHTML = lista.map(function (u) {
+    var acc = '';
+    if (ses.permisos.indexOf('usuarios.editar') >= 0) {
+      acc += '<button class="btn btn-sm" onclick="editar(\'' + u.id + '\')">Editar</button> ';
+      acc += '<button class="btn btn-sm btn-secondary" onclick="cambiarEstado(\'' + u.id + '\')">' + (u.estado === 'Activo' ? 'Desactivar' : 'Activar') + '</button> ';
+    }
+    if (ses.permisos.indexOf('usuarios.eliminar') >= 0)
+      acc += '<button class="btn btn-sm btn-danger" onclick="eliminar(\'' + u.id + '\')">Eliminar</button>';
+    return '<tr><td>' + u.id + '</td><td>' + APP.esc(u.usuario) + '</td><td>' + APP.esc(u.nombre) + '</td><td>' +
+      APP.esc(nombrePerfil(u.perfil)) + '</td><td><span class="badge ' + (u.estado === 'Activo' ? 'badge-ok' : 'badge-err') + '">' +
+      u.estado + '</span></td><td>' + u.creado + '</td><td style="text-align:center">' + acc + '</td></tr>';
+  }).join('');
+}
+
+function limpiarFiltros() {
+  document.getElementById('fTexto').value = '';
+  document.getElementById('fPerfil').value = '';
+  document.getElementById('fEstado').value = '';
+  pintar();
+}
+
+function abrirForm(titulo) {
+  document.getElementById('formTitulo').textContent = titulo;
+  document.getElementById('panelForm').className = 'panel';
+  APP.mensaje('msgForm', '', '');
+  document.getElementById('panelForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+function cancelar() { document.getElementById('panelForm').className = 'panel oculto'; }
+
+function nuevo() {
+  if (ses.permisos.indexOf('usuarios.crear') < 0) { APP.mensaje('msg', 'Su perfil no tiene el permiso usuarios.crear.', 'error'); return; }
+  document.getElementById('fId').value = '';
+  ['cUsuario', 'cNombre', 'cClave', 'cClave2'].forEach(function (i) { document.getElementById(i).value = ''; });
+  document.getElementById('cPerfil').value = 'ASESOR';
+  document.getElementById('cEstado').value = 'Activo';
+  document.getElementById('cUsuario').disabled = false;
+  abrirForm('NUEVO USUARIO');
+}
+
+function editar(id) {
+  var u = SIACDATA.usuarios().filter(function (x) { return x.id === id; })[0];
+  if (!u) return;
+  document.getElementById('fId').value = u.id;
+  document.getElementById('cUsuario').value = u.usuario;
+  document.getElementById('cUsuario').disabled = true;
+  document.getElementById('cNombre').value = u.nombre;
+  document.getElementById('cPerfil').value = u.perfil;
+  document.getElementById('cEstado').value = u.estado;
+  document.getElementById('cClave').value = '';
+  document.getElementById('cClave2').value = '';
+  abrirForm('EDITAR USUARIO ' + u.id);
+}
+
+function claveValida(c) { return c.length >= 8 && /[A-Z]/.test(c) && /[0-9]/.test(c) && /[^A-Za-z0-9]/.test(c); }
+
+function adminsActivos(lista) {
+  return lista.filter(function (u) { return u.perfil === 'ADMIN' && u.estado === 'Activo'; }).length;
+}
+
+function guardar() {
+  var lista = SIACDATA.usuarios();
+  var id = document.getElementById('fId').value;
+  var usuario = document.getElementById('cUsuario').value.trim();
+  var nombre = document.getElementById('cNombre').value.trim();
+  var perfil = document.getElementById('cPerfil').value;
+  var estado = document.getElementById('cEstado').value;
+  var c1 = document.getElementById('cClave').value, c2 = document.getElementById('cClave2').value;
+
+  if (!usuario) { APP.mensaje('msgForm', 'Debe ingresar el usuario.', 'error'); return; }
+  if (!nombre) { APP.mensaje('msgForm', 'Debe ingresar el nombre.', 'error'); return; }
+  if (!perfil) { APP.mensaje('msgForm', 'Debe seleccionar un perfil válido.', 'error'); return; }
+
+  var dup = lista.filter(function (u) { return u.usuario.toLowerCase() === usuario.toLowerCase() && u.id !== id; });
+  if (dup.length) { APP.mensaje('msgForm', 'El usuario <b>' + APP.esc(usuario) + '</b> ya existe. Debe ser único.', 'error'); return; }
+
+  if (!id) {
+    if (!c1) { APP.mensaje('msgForm', 'Debe ingresar la contraseña.', 'error'); return; }
+    if (!claveValida(c1)) { APP.mensaje('msgForm', 'La contraseña no cumple la regla local de demostración.', 'error'); return; }
+    if (c1 !== c2) { APP.mensaje('msgForm', 'Las contraseñas no coinciden.', 'error'); return; }
+    var nid = 'U' + String(1 + lista.reduce(function (m, u) { return Math.max(m, parseInt(u.id.substring(1), 10) || 0); }, 0)).padStart(4, '0');
+    lista.push({
+      id: nid, usuario: usuario, clave: c1, nombre: nombre, perfil: perfil, estado: estado,
+      creado: new Date().toISOString().substring(0, 10), protegido: false
+    });
+    SIACDATA.guardarUsuarios(lista);
+    cancelar(); pintar();
+    APP.mensaje('msg', 'Usuario <b>' + APP.esc(usuario) + '</b> creado correctamente con ID ' + nid + ' (SIMULADO).', 'ok');
+    return;
+  }
+
+  var u = lista.filter(function (x) { return x.id === id; })[0];
+  if (!u) return;
+  if (c1 || c2) {
+    if (!claveValida(c1)) { APP.mensaje('msgForm', 'La contraseña no cumple la regla local de demostración.', 'error'); return; }
+    if (c1 !== c2) { APP.mensaje('msgForm', 'Las contraseñas no coinciden.', 'error'); return; }
+    u.clave = c1;
+  }
+  var simulado = JSON.parse(JSON.stringify(lista));
+  simulado.forEach(function (x) { if (x.id === id) { x.perfil = perfil; x.estado = estado; } });
+  if (adminsActivos(simulado) === 0) {
+    APP.mensaje('msgForm', 'No es posible dejar el simulador sin un administrador activo. Mantenga al menos una cuenta con perfil Administrador en estado Activo.', 'error');
+    return;
+  }
+  u.nombre = nombre; u.perfil = perfil; u.estado = estado;
+  SIACDATA.guardarUsuarios(lista);
+  cancelar(); pintar();
+  APP.mensaje('msg', 'Usuario <b>' + APP.esc(u.usuario) + '</b> actualizado correctamente (SIMULADO). Los permisos se recalculan al navegar.', 'ok');
+}
+
+function cambiarEstado(id) {
+  var lista = SIACDATA.usuarios();
+  var u = lista.filter(function (x) { return x.id === id; })[0];
+  if (!u) return;
+  var nuevoEstado = u.estado === 'Activo' ? 'Inactivo' : 'Activo';
+  if (nuevoEstado === 'Inactivo') {
+    var sim = JSON.parse(JSON.stringify(lista));
+    sim.forEach(function (x) { if (x.id === id) x.estado = 'Inactivo'; });
+    if (adminsActivos(sim) === 0) { APP.mensaje('msg', 'No se puede desactivar: el simulador quedaría sin administrador activo.', 'error'); return; }
+  }
+  APP.confirmar('¿Confirma cambiar el estado del usuario <b>' + APP.esc(u.usuario) + '</b> a <b>' + nuevoEstado + '</b>?', function () {
+    u.estado = nuevoEstado;
+    SIACDATA.guardarUsuarios(lista);
+    pintar();
+    APP.mensaje('msg', 'Estado actualizado a ' + nuevoEstado + ' (SIMULADO).', 'ok');
+  });
+}
+
+function eliminar(id) {
+  var lista = SIACDATA.usuarios();
+  var u = lista.filter(function (x) { return x.id === id; })[0];
+  if (!u) return;
+  if (u.protegido) { APP.mensaje('msg', 'La cuenta administradora inicial está protegida y no puede eliminarse.', 'error'); return; }
+  APP.confirmar('¿Está seguro de eliminar el usuario <b>' + APP.esc(u.usuario) + '</b>?<br><br>' +
+    'Se aplicará <b>baja lógica</b> (estado Eliminado) para conservar el historial de sesiones del reporte.', function () {
+    var sim = JSON.parse(JSON.stringify(lista));
+    sim.forEach(function (x) { if (x.id === id) x.estado = 'Inactivo'; });
+    if (adminsActivos(sim) === 0) { APP.mensaje('msg', 'No se puede eliminar: el simulador quedaría sin administrador activo.', 'error'); return; }
+    var res = lista.filter(function (x) { return x.id !== id; });
+    SIACDATA.guardarUsuarios(res);
+    pintar();
+    APP.mensaje('msg', 'Usuario <b>' + APP.esc(u.usuario) + '</b> eliminado (SIMULADO). Su ID ' + u.id + ' se conserva en el historial del reporte.', 'ok');
+  });
+}
+
+pintar();
+}
+</script>
+</body>
+</html>

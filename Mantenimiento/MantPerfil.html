@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SIAC ÚNICO - Mantenimiento de Perfiles</title>
+<link rel="stylesheet" href="../assets_css_styles.css">
+</head>
+<body>
+<div id="hdr"></div>
+<div class="container">
+  <div class="breadcrumb">Portal &gt; Administración &gt; Mantenimiento de Perfiles</div>
+  <h1 class="page-title">Mantenimiento de Perfiles y Permisos (SIMULADO)</h1>
+  <div id="msg" class="oculto"></div>
+
+  <div class="panel">
+    <div class="panel-header">PERFILES REGISTRADOS</div>
+    <div class="panel-body">
+      <table class="grid">
+        <thead><tr>
+          <th style="width:90px">Código</th><th style="width:170px">Perfil</th><th>Descripción</th>
+          <th style="width:90px">Usuarios</th><th style="width:90px">Permisos</th><th style="width:230px">Acciones</th>
+        </tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+      <div class="botonera"><button type="button" class="btn btn-dark" onclick="nuevo()">Nuevo perfil</button></div>
+    </div>
+  </div>
+
+  <div class="panel oculto" id="panelForm">
+    <div class="panel-header" id="formTitulo">NUEVO PERFIL</div>
+    <div class="panel-body">
+      <div id="msgForm" class="oculto"></div>
+      <input type="hidden" id="fId">
+      <div class="form-row">
+        <div class="form-group"><label>Código <span class="obligatorio">(*)</span></label><input type="text" id="cCodigo" maxlength="10" placeholder="Ej. SUPERV"></div>
+        <div class="form-group"><label>Nombre <span class="obligatorio">(*)</span></label><input type="text" id="cNombre" maxlength="40"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="flex:1 1 100%"><label>Descripción:</label><input type="text" id="cDesc" maxlength="120"></div>
+      </div>
+      <div class="panel" style="margin-top:8px">
+        <div class="panel-header">MATRIZ DE PERMISOS</div>
+        <div class="panel-body" id="matriz"></div>
+      </div>
+      <div class="botonera">
+        <button type="button" class="btn" onclick="guardar()">Guardar</button>
+        <button type="button" class="btn btn-secondary" onclick="cancelar()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="footer-nota">ENTORNO DE ENTRENAMIENTO · Datos ficticios</div>
+
+<script>window.SIAC_BASE = '../';</script>
+<script src="../assets_js_data.js"></script>
+<script src="../assets_js_auth.js"></script>
+<script src="../assets_js_app.js"></script>
+<script>
+var ses = SIACAUTH.exigir('perfiles.gestionar');
+if (ses) {
+SIACAUTH.pintarHeader('hdr', { activo: 'perfiles' });
+
+function usuariosDe(idPerfil) {
+  return SIACDATA.usuarios().filter(function (u) { return u.perfil === idPerfil; });
+}
+
+function pintar() {
+  var lista = SIACDATA.perfiles();
+  document.getElementById('tbody').innerHTML = lista.map(function (p) {
+    var n = usuariosDe(p.id).length;
+    var acc = '<button class="btn btn-sm" onclick="editar(\'' + p.id + '\')">Editar permisos</button> ';
+    acc += '<button class="btn btn-sm btn-danger" onclick="eliminar(\'' + p.id + '\')">Eliminar</button>';
+    return '<tr><td>' + p.id + '</td><td>' + APP.esc(p.nombre) + (p.sistema ? ' <span class="badge">BASE</span>' : '') +
+      '</td><td>' + APP.esc(p.descripcion) + '</td><td style="text-align:center">' + n +
+      '</td><td style="text-align:center">' + p.permisos.length + '</td><td style="text-align:center">' + acc + '</td></tr>';
+  }).join('');
+}
+
+function pintarMatriz(permisos) {
+  var cats = {};
+  SIACDATA.PERMISOS.forEach(function (p) { (cats[p.cat] = cats[p.cat] || []).push(p); });
+  var trx = SIACDATA.transacciones();
+  var html = '';
+  Object.keys(cats).forEach(function (c) {
+    html += '<div style="margin-bottom:10px"><b>' + APP.esc(c) + '</b><div style="margin-top:4px">';
+    cats[c].forEach(function (p) {
+      var etiqueta = p.desc;
+      if (c === 'Transacciones') {
+        var t = trx.filter(function (x) { return x.permiso === p.id; })[0];
+        if (t) etiqueta = 'Ejecutar simulación: ' + t.nombre + ' (' + t.id + ')';
+      }
+      html += '<label style="display:block;margin:2px 0"><input type="checkbox" class="permiso" value="' + p.id + '"' +
+        (permisos.indexOf(p.id) >= 0 ? ' checked' : '') + '> ' + APP.esc(etiqueta) + ' <code>' + p.id + '</code></label>';
+    });
+    html += '</div></div>';
+  });
+  document.getElementById('matriz').innerHTML = html;
+}
+
+function abrir(titulo) {
+  document.getElementById('formTitulo').textContent = titulo;
+  document.getElementById('panelForm').className = 'panel';
+  APP.mensaje('msgForm', '', '');
+  document.getElementById('panelForm').scrollIntoView({ behavior: 'smooth' });
+}
+function cancelar() { document.getElementById('panelForm').className = 'panel oculto'; }
+
+function nuevo() {
+  document.getElementById('fId').value = '';
+  document.getElementById('cCodigo').value = '';
+  document.getElementById('cCodigo').disabled = false;
+  document.getElementById('cNombre').value = '';
+  document.getElementById('cDesc').value = '';
+  pintarMatriz([]);
+  abrir('NUEVO PERFIL');
+}
+
+function editar(id) {
+  var p = SIACDATA.perfilPorId(id);
+  if (!p) return;
+  document.getElementById('fId').value = p.id;
+  document.getElementById('cCodigo').value = p.id;
+  document.getElementById('cCodigo').disabled = true;
+  document.getElementById('cNombre').value = p.nombre;
+  document.getElementById('cDesc').value = p.descripcion;
+  pintarMatriz(p.permisos);
+  abrir('EDITAR PERFIL ' + p.id);
+}
+
+function seleccionados() {
+  return Array.prototype.slice.call(document.querySelectorAll('.permiso:checked')).map(function (c) { return c.value; });
+}
+
+function guardar() {
+  var lista = SIACDATA.perfiles();
+  var id = document.getElementById('fId').value;
+  var cod = document.getElementById('cCodigo').value.trim().toUpperCase();
+  var nom = document.getElementById('cNombre').value.trim();
+  var des = document.getElementById('cDesc').value.trim();
+  var permisos = seleccionados();
+
+  if (!cod) { APP.mensaje('msgForm', 'Debe ingresar el código del perfil.', 'error'); return; }
+  if (!nom) { APP.mensaje('msgForm', 'Debe ingresar el nombre del perfil.', 'error'); return; }
+  var dupN = lista.filter(function (p) { return p.nombre.toLowerCase() === nom.toLowerCase() && p.id !== id; });
+  if (dupN.length) { APP.mensaje('msgForm', 'Ya existe un perfil con el nombre <b>' + APP.esc(nom) + '</b>.', 'error'); return; }
+
+  if (!id) {
+    if (lista.filter(function (p) { return p.id === cod; }).length) {
+      APP.mensaje('msgForm', 'Ya existe un perfil con el código <b>' + cod + '</b>.', 'error'); return;
+    }
+    lista.push({ id: cod, nombre: nom, descripcion: des || '(sin descripción)', permisos: permisos, sistema: false });
+  } else {
+    var p = lista.filter(function (x) { return x.id === id; })[0];
+    var sim = JSON.parse(JSON.stringify(lista));
+    sim.forEach(function (x) { if (x.id === id) x.permisos = permisos; });
+    var hayAdmin = SIACDATA.usuarios().some(function (u) {
+      if (u.estado !== 'Activo') return false;
+      var pp = sim.filter(function (x) { return x.id === u.perfil; })[0];
+      return pp && pp.permisos.indexOf('perfiles.gestionar') >= 0 && pp.permisos.indexOf('usuarios.ver') >= 0;
+    });
+    if (!hayAdmin) { APP.mensaje('msgForm', 'Debe mantenerse al menos un perfil con capacidad administrativa asignado a un usuario activo.', 'error'); return; }
+    p.nombre = nom; p.descripcion = des || p.descripcion; p.permisos = permisos;
+  }
+  SIACDATA.guardarPerfiles(lista);
+  cancelar(); pintar();
+  APP.mensaje('msg', 'Perfil guardado correctamente (SIMULADO). La navegación y la autorización se actualizan al recargar las páginas.', 'ok');
+  SIACAUTH.refrescar();
+  SIACAUTH.pintarHeader('hdr', { activo: 'perfiles' });
+}
+
+function eliminar(id) {
+  var lista = SIACDATA.perfiles();
+  var p = lista.filter(function (x) { return x.id === id; })[0];
+  if (!p) return;
+  var usrs = usuariosDe(id);
+  if (usrs.length) {
+    APP.mensaje('msg', 'No se puede eliminar el perfil <b>' + APP.esc(p.nombre) + '</b>: tiene ' + usrs.length +
+      ' usuario(s) asociado(s). Reasigne los usuarios antes de eliminarlo.', 'error');
+    return;
+  }
+  if (p.sistema) { APP.mensaje('msg', 'Los perfiles base Administrador y Asesor no pueden eliminarse en el simulador.', 'error'); return; }
+  APP.confirmar('¿Está seguro de eliminar el perfil <b>' + APP.esc(p.nombre) + '</b>?', function () {
+    SIACDATA.guardarPerfiles(lista.filter(function (x) { return x.id !== id; }));
+    pintar();
+    APP.mensaje('msg', 'Perfil eliminado (SIMULADO).', 'ok');
+  });
+}
+
+pintar();
+}
+</script>
+</body>
+</html>
